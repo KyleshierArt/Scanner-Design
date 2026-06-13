@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scanner X</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- TopBar -->
+  <header class="topbar">
+    <span class="topbar__brand">Scanner X</span>
+    <span class="topbar__divider">|</span>
+    <button class="topbar__case-name" id="btn-edit-case" title="Edit case name">
+      <svg class="icon icon--xs"><use href="#icon-pencil"/></svg>
+      <span id="case-name-display">New Case — Maxilla</span>
+    </button>
+    <button class="topbar__save" id="btn-save" title="Save case">
+      <svg class="icon icon--sm"><use href="#icon-save"/></svg>
+      Save
+    </button>
+    <span class="topbar__spacer"></span>
+    <button class="topbar__window-btn" title="Minimize" aria-label="Minimize">
+      <svg class="icon icon--sm"><use href="#icon-minus"/></svg>
+    </button>
+    <button class="topbar__window-btn" title="Maximize" aria-label="Maximize">
+      <svg class="icon icon--sm"><use href="#icon-square"/></svg>
+    </button>
+    <button class="topbar__window-btn" title="Close" aria-label="Close">
+      <svg class="icon icon--sm"><use href="#icon-x"/></svg>
+    </button>
+  </header>
+
+  <!-- StageNav -->
+  <nav class="stagenav" aria-label="Scan stages">
+    <button class="stagenav__pill stagenav__pill--active" data-stage="maxilla" aria-current="step">
+      <svg class="icon icon--md icon--filled"><use href="#icon-maxilla"/></svg>
+      Maxilla
+    </button>
+    <button class="stagenav__pill" data-stage="mandible">
+      <svg class="icon icon--md"><use href="#icon-mandible"/></svg>
+      Mandible
+    </button>
+    <button class="stagenav__pill" data-stage="occlusion">
+      <svg class="icon icon--md"><use href="#icon-occlusion"/></svg>
+      Occlusion
+    </button>
+    <button class="stagenav__pill" data-stage="complete">
+      <svg class="icon icon--md"><use href="#icon-check-circle"/></svg>
+      Complete
+    </button>
+  </nav>
+
+  <!-- Main content area -->
+  <div class="main-content">
+    <!-- LeftRail -->
+    <aside class="leftrail">
+      <div class="leftrail__tools" id="rail-tools">
+        <!-- Tools populated by JS based on stage -->
+      </div>
+      <!-- DeviceStatus -->
+      <button class="device-status device-status--disconnected" id="btn-device" title="Device: Offline (click to cycle mock)">
+        <span class="device-status__dot"></span>
+        <svg class="icon icon--sm"><use href="#icon-unlink"/></svg>
+        <span class="device-status__label">Offline</span>
+      </button>
+    </aside>
+    <!-- Expansion panel (shown when tool selected) -->
+    <div class="leftrail__panel" id="rail-panel" hidden>
+      <div class="leftrail__panel-content" id="rail-panel-content">
+        <!-- Panel content populated by JS -->
+      </div>
+    </div>
+
+    <!-- ScanCanvas -->
+    <main class="scancanvas">
+      <div class="scancanvas__grid">
+        <div class="scancanvas__placeholder">
+          <svg class="scancanvas__arch" viewBox="0 0 200 120" fill="none">
+            <path d="M30 100 C30 40, 170 40, 170 100" stroke="var(--color-border-strong)" stroke-width="2" stroke-dasharray="6 4" fill="none"/>
+            <path d="M50 95 C50 55, 150 55, 150 95" stroke="var(--color-border)" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+          </svg>
+          <div class="scancanvas__title">3D Scan Preview</div>
+          <div class="scancanvas__sub">Scan model will appear here</div>
+        </div>
+      </div>
+      <div class="scancanvas__guidance" id="guidance">
+        Connect the scanner to begin scanning the upper arch.
+      </div>
+    </main>
+
+    <!-- CameraPreview -->
+    <div class="camera" id="camera-preview">
+      <div class="camera__header">
+        <div class="camera__header-left">
+          <svg class="icon icon--xs"><use href="#icon-camera"/></svg>
+          <span>Live Camera</span>
+          <span class="camera__fps">-- fps</span>
+        </div>
+        <div class="camera__actions">
+          <button class="camera__btn" title="Screenshot">
+            <svg class="icon icon--sm"><use href="#icon-camera"/></svg>
+          </button>
+          <button class="camera__btn" id="btn-camera-size" title="Enlarge">
+            <svg class="icon icon--sm"><use href="#icon-maximize"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="camera__body">Camera feed placeholder</div>
+    </div>
+
+    <!-- ScanProgress -->
+    <div class="scan-progress" id="scan-progress" hidden>
+      <div class="scan-progress__item">
+        <span class="scan-progress__label">Frames</span>
+        <span class="scan-progress__value" id="progress-frames">0</span>
+      </div>
+      <div class="scan-progress__item">
+        <span class="scan-progress__label">Time</span>
+        <span class="scan-progress__value" id="progress-time">00:00</span>
+      </div>
+    </div>
+
+    <!-- ScanControls -->
+    <div class="scan-controls" id="scan-controls">
+      <!-- Bite selector (occlusion only) -->
+      <div class="scan-controls__bite-selector" id="bite-selector" hidden>
+        <button class="scan-controls__bite-btn" data-bite="left">Left Bite</button>
+        <button class="scan-controls__bite-btn" data-bite="right">Right Bite</button>
+        <button class="scan-controls__bite-btn scan-controls__bite-btn--active" data-bite="centric">Centric</button>
+      </div>
+      <button class="scan-controls__primary" id="btn-start">
+        <svg class="icon icon--md"><use href="#icon-play"/></svg>
+        Start Scan
+      </button>
+      <button class="scan-controls__secondary" id="btn-reset" disabled>
+        <svg class="icon icon--sm"><use href="#icon-rotate-ccw"/></svg>
+        Reset
+      </button>
+      <button class="scan-controls__danger" id="btn-delete" disabled>
+        <svg class="icon icon--sm"><use href="#icon-trash"/></svg>
+        Delete
+      </button>
+      <button class="scan-controls__secondary" id="btn-complete" disabled>
+        Complete
+      </button>
+      <button class="scan-controls__send" id="btn-send" hidden>
+        <svg class="icon icon--sm"><use href="#icon-send"/></svg>
+        Send to Lab
+      </button>
+    </div>
+  </div>
+
+  <!-- Dialog overlay -->
+  <div class="dialog-overlay" id="dialog-overlay" hidden>
+    <div class="dialog" id="dialog" role="dialog" aria-modal="true">
+      <div class="dialog__title" id="dialog-title"></div>
+      <div class="dialog__body" id="dialog-body"></div>
+      <input class="dialog__input" id="dialog-input" hidden>
+      <div class="dialog__actions">
+        <button class="dialog__btn-cancel" id="dialog-cancel">Cancel</button>
+        <button class="dialog__btn-primary" id="dialog-confirm"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inline SVG icon sprite -->
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Custom dental icons -->
+    <symbol id="icon-maxilla" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 18C4 9 8 4 12 4C16 4 20 9 20 18" fill="rgba(currentColor, 0.06)"/>
+      <g stroke-width="1" opacity="0.5">
+        <path d="M7 15C7.5 13 8 12 9 12C10 12 10 13 10.5 15"/>
+        <path d="M10.5 15C11 13 11.5 12 12 12C12.5 12 13 13 13.5 15"/>
+        <path d="M13.5 15C14 13 14.5 12 15.5 12C16.5 12 16.5 13 17 15"/>
+      </g>
+      <g fill="currentColor" stroke="none" opacity="0.4">
+        <circle cx="9" cy="12" r="0.8"/>
+        <circle cx="12" cy="11.5" r="0.8"/>
+        <circle cx="15.5" cy="12" r="0.8"/>
+      </g>
+    </symbol>
+    <symbol id="icon-maxilla-filled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 18C4 9 8 4 12 4C16 4 20 9 20 18" fill="currentColor"/>
+      <g stroke-width="1" opacity="0.5">
+        <path d="M7 15C7.5 13 8 12 9 12C10 12 10 13 10.5 15"/>
+        <path d="M10.5 15C11 13 11.5 12 12 12C12.5 12 13 13 13.5 15"/>
+        <path d="M13.5 15C14 13 14.5 12 15.5 12C16.5 12 16.5 13 17 15"/>
+      </g>
+      <g fill="currentColor" stroke="none" opacity="0.4">
+        <circle cx="9" cy="12" r="0.8"/>
+        <circle cx="12" cy="11.5" r="0.8"/>
+        <circle cx="15.5" cy="12" r="0.8"/>
+      </g>
+    </symbol>
+    <symbol id="icon-mandible" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 6C4 15 8 20 12 20C16 20 20 15 20 6" fill="rgba(currentColor, 0.06)"/>
+      <g stroke-width="1" opacity="0.5">
+        <path d="M7 9C7.5 11 8 12 9 12C10 12 10 11 10.5 9"/>
+        <path d="M10.5 9C11 11 11.5 12 12 12C12.5 12 13 11 13.5 9"/>
+        <path d="M13.5 9C14 11 14.5 12 15.5 12C16.5 12 16.5 11 17 9"/>
+      </g>
+      <g fill="currentColor" stroke="none" opacity="0.4">
+        <circle cx="9" cy="12" r="0.8"/>
+        <circle cx="12" cy="12.5" r="0.8"/>
+        <circle cx="15.5" cy="12" r="0.8"/>
+      </g>
+    </symbol>
+    <symbol id="icon-mandible-filled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 6C4 15 8 20 12 20C16 20 20 15 20 6" fill="currentColor"/>
+      <g stroke-width="1" opacity="0.5">
+        <path d="M7 9C7.5 11 8 12 9 12C10 12 10 11 10.5 9"/>
+        <path d="M10.5 9C11 11 11.5 12 12 12C12.5 12 13 11 13.5 9"/>
+        <path d="M13.5 9C14 11 14.5 12 15.5 12C16.5 12 16.5 11 17 9"/>
+      </g>
+      <g fill="currentColor" stroke="none" opacity="0.4">
+        <circle cx="9" cy="12" r="0.8"/>
+        <circle cx="12" cy="12.5" r="0.8"/>
+        <circle cx="15.5" cy="12" r="0.8"/>
+      </g>
+    </symbol>
+    <symbol id="icon-occlusion" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 10C4 4 8 2 12 2C16 2 20 4 20 10" fill="rgba(currentColor, 0.06)"/>
+      <path d="M4 14C4 20 8 22 12 22C16 22 20 20 20 14" fill="rgba(currentColor, 0.06)"/>
+      <line x1="12" y1="7" x2="12" y2="11"/>
+      <polygon points="10,9 12,11 14,9" fill="currentColor" stroke="none" opacity="0.6"/>
+      <line x1="12" y1="17" x2="12" y2="13"/>
+      <polygon points="10,15 12,13 14,15" fill="currentColor" stroke="none" opacity="0.6"/>
+      <line x1="6" y1="12" x2="18" y2="12" stroke-width="1" stroke-dasharray="2 2" opacity="0.3"/>
+    </symbol>
+    <symbol id="icon-occlusion-filled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 10C4 4 8 2 12 2C16 2 20 4 20 10" fill="currentColor"/>
+      <path d="M4 14C4 20 8 22 12 22C16 22 20 20 20 14" fill="currentColor"/>
+    </symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="8,12 11,15 16,9" stroke-width="2.3"/>
+    </symbol>
+    <symbol id="icon-check-circle-filled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10" fill="rgba(currentColor, 0.1)"/>
+      <polyline points="8,12 11,15 16,9" stroke-width="2.3"/>
+    </symbol>
+    <symbol id="icon-crop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 2L7 7L2 7"/>
+      <path d="M17 2L17 7L22 7"/>
+      <path d="M7 22L7 17L2 17"/>
+      <path d="M17 22L17 17L22 17"/>
+      <rect x="7" y="7" width="10" height="10" stroke-dasharray="3 2"/>
+      <g fill="currentColor" stroke="none" opacity="0.5">
+        <circle cx="7" cy="2" r="1"/>
+        <circle cx="17" cy="2" r="1"/>
+        <circle cx="7" cy="22" r="1"/>
+        <circle cx="17" cy="22" r="1"/>
+      </g>
+    </symbol>
+    <symbol id="icon-undercut" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="4" y1="4" x2="14" y2="14"/>
+      <circle cx="4" cy="4" r="2" fill="currentColor"/>
+      <line x1="2" y1="20" x2="22" y2="20"/>
+      <path d="M10 20L14 14L18 20Z" fill="rgba(214, 69, 69, 0.12)"/>
+      <line x1="12" y1="17" x2="16" y2="17" stroke-width="1" opacity="0.5"/>
+    </symbol>
+
+    <!-- Lucide icons -->
+    <symbol id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="6,3 20,12 6,21"/>
+    </symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="4" width="4" height="16" rx="1"/>
+      <rect x="14" y="4" width="4" height="16" rx="1"/>
+    </symbol>
+    <symbol id="icon-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="1,4 1,10 7,10"/>
+      <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+    </symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="3,6 5,6 21,6"/>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    </symbol>
+    <symbol id="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/>
+      <polygon points="22,2 15,22 11,13 2,9"/>
+    </symbol>
+    <symbol id="icon-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
+    </symbol>
+    <symbol id="icon-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15,3 21,3 21,9"/>
+      <polyline points="9,21 3,21 3,15"/>
+      <line x1="21" y1="3" x2="14" y2="10"/>
+      <line x1="3" y1="21" x2="10" y2="14"/>
+    </symbol>
+    <symbol id="icon-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="4,14 10,14 10,20"/>
+      <polyline points="20,10 14,10 14,4"/>
+      <line x1="14" y1="10" x2="21" y2="3"/>
+      <line x1="3" y1="21" x2="10" y2="14"/>
+    </symbol>
+    <symbol id="icon-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+    </symbol>
+    <symbol id="icon-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17,21 17,13 7,13 7,21"/>
+      <polyline points="7,3 7,8 15,8"/>
+    </symbol>
+    <symbol id="icon-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </symbol>
+    <symbol id="icon-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+    </symbol>
+    <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </symbol>
+    <symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </symbol>
+    <symbol id="icon-unlink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+      <path d="M5.16 11.75l-1.72 1.71a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
+    </symbol>
+    <symbol id="icon-wand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 4V2"/>
+      <path d="M15 16v-2"/>
+      <path d="M8 9h2"/>
+      <path d="M20 9h2"/>
+      <path d="M17.8 11.8L19 13"/>
+      <path d="M15 9h0"/>
+      <path d="M17.8 6.2L19 5"/>
+      <path d="M11 6.2L9.7 5"/>
+      <path d="M11 11.8L9.7 13"/>
+      <path d="M5.3 18.7l8.4-8.4"/>
+    </symbol>
+    <symbol id="icon-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.8 10-10 10Z"/>
+      <path d="M2 21c0-3 1.9-5.5 4.5-6.5"/>
+    </symbol>
+    <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <polyline points="9,12 11,14 15,10"/>
+    </symbol>
+  </svg>
+
+  <script src="app.js"></script>
+</body>
+</html>
