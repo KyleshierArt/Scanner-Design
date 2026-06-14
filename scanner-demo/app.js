@@ -1,6 +1,26 @@
 (function () {
   "use strict";
 
+  // ── Patient data ──
+
+  const PATIENTS = [
+    { id: 1, name: "John Miller", type: "Orthodontics", date: "2026-06-13", status: "scanning" },
+    { id: 2, name: "Sarah Chen", type: "Crown & Bridge", date: "2026-06-12", status: "completed" },
+    { id: 3, name: "Michael Brown", type: "Orthodontics", date: "2026-06-12", status: "pending" },
+    { id: 4, name: "Emily Davis", type: "Implant", date: "2026-06-11", status: "sent" },
+    { id: 5, name: "David Wilson", type: "Crown & Bridge", date: "2026-06-11", status: "completed" },
+    { id: 6, name: "Lisa Wang", type: "Denture", date: "2026-06-10", status: "pending" },
+    { id: 7, name: "James Taylor", type: "Orthodontics", date: "2026-06-09", status: "sent" },
+    { id: 8, name: "Anna Kim", type: "Implant", date: "2026-06-08", status: "completed" },
+  ];
+
+  const STATUS_LABELS = {
+    scanning: "Scanning",
+    completed: "Completed",
+    pending: "Pending",
+    sent: "Sent to Lab",
+  };
+
   // ── Constants ──
 
   const STAGE_ORDER = ["maxilla", "mandible", "occlusion", "complete"];
@@ -135,6 +155,9 @@
   // ── State ──
 
   const state = {
+    currentView: "patientList",
+    searchQuery: "",
+    selectedPatient: null,
     stage: "maxilla",
     stageData: { maxilla: "active", mandible: "pending", occlusion: "pending", complete: "disabled" },
     deviceStatus: "disconnected",
@@ -154,6 +177,12 @@
   const $$ = (sel) => document.querySelectorAll(sel);
 
   const el = {
+    viewPatientList: () => $("#view-patient-list"),
+    viewScan: () => $("#view-scan"),
+    patientTableBody: () => $("#patient-table-body"),
+    searchInput: () => $("#patient-search-input"),
+    btnNewCase: () => $("#btn-new-case"),
+    btnBack: () => $("#btn-back"),
     caseNameDisplay: () => $("#case-name-display"),
     stagePills: () => $$(".stagenav__pill"),
     railTools: () => $("#rail-tools"),
@@ -179,6 +208,38 @@
   };
 
   // ── Actions ──
+
+  function switchView(view) {
+    state.currentView = view;
+    const listEl = el.viewPatientList();
+    const scanEl = el.viewScan();
+    if (view === "patientList") {
+      listEl.classList.add("view--active");
+      scanEl.classList.remove("view--active");
+      renderPatientList();
+    } else {
+      listEl.classList.remove("view--active");
+      scanEl.classList.add("view--active");
+    }
+  }
+
+  function openPatient(patient) {
+    state.selectedPatient = patient;
+    state.caseName = patient ? patient.name : "New Case";
+    state.stage = "maxilla";
+    state.stageData = { maxilla: "active", mandible: "pending", occlusion: "pending", complete: "disabled" };
+    state.deviceStatus = "disconnected";
+    state.selectedTool = null;
+    state.scanProgress = { frames: 0, elapsed: 0 };
+    stopTimer();
+    switchView("scan");
+    render();
+  }
+
+  function backToList() {
+    stopTimer();
+    switchView("patientList");
+  }
 
   function isScanning() {
     return state.deviceStatus === "scanning";
@@ -288,6 +349,34 @@
   }
 
   // ── Render functions ──
+
+  function renderPatientList() {
+    const tbody = el.patientTableBody();
+    if (!tbody) return;
+    const q = state.searchQuery.toLowerCase();
+    const filtered = PATIENTS.filter(function (p) {
+      return p.name.toLowerCase().includes(q) ||
+        p.type.toLowerCase().includes(q) ||
+        STATUS_LABELS[p.status].toLowerCase().includes(q);
+    });
+    tbody.innerHTML = filtered.map(function (p) {
+      return '<tr class="patient-table__tr" data-patient-id="' + p.id + '">' +
+        '<td class="patient-table__td patient-table__td--name">' + p.name + '</td>' +
+        '<td class="patient-table__td">' + p.type + '</td>' +
+        '<td class="patient-table__td">' + p.date + '</td>' +
+        '<td class="patient-table__td"><span class="patient-table__status patient-table__status--' + p.status + '">' +
+        '<span class="patient-table__status-dot"></span>' + STATUS_LABELS[p.status] + '</span></td>' +
+        '</tr>';
+    }).join("");
+
+    tbody.querySelectorAll(".patient-table__tr").forEach(function (row) {
+      row.addEventListener("click", function () {
+        var id = parseInt(row.dataset.patientId);
+        var patient = PATIENTS.find(function (p) { return p.id === id; });
+        if (patient) openPatient(patient);
+      });
+    });
+  }
 
   function render() {
     renderTopBar();
@@ -560,6 +649,18 @@
   // ── Event bindings ──
 
   document.addEventListener("DOMContentLoaded", function () {
+    // Patient list events
+    el.searchInput().addEventListener("input", function () {
+      state.searchQuery = this.value;
+      renderPatientList();
+    });
+
+    el.btnNewCase().addEventListener("click", function () {
+      openPatient(null);
+    });
+
+    el.btnBack().addEventListener("click", backToList);
+
     // Stage nav
     el.stagePills().forEach(function (pill) {
       pill.addEventListener("click", function () {
@@ -649,6 +750,6 @@
     });
 
     // Initial render
-    render();
+    switchView("patientList");
   });
 })();

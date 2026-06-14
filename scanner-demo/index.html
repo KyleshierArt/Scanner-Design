@@ -8,8 +8,54 @@
 </head>
 <body>
 
+  <!-- Patient List View -->
+  <div class="view view--patient-list" id="view-patient-list">
+    <header class="topbar">
+      <span class="topbar__brand">Scanner X</span>
+      <span class="topbar__spacer"></span>
+      <div class="patient-search">
+        <svg class="icon icon--sm"><use href="#icon-search"/></svg>
+        <input class="patient-search__input" id="patient-search-input" type="text" placeholder="Search patients…">
+      </div>
+      <button class="patient-search__new-btn" id="btn-new-case" title="New Case">
+        <svg class="icon icon--sm"><use href="#icon-plus"/></svg>
+        New Case
+      </button>
+      <span class="topbar__spacer"></span>
+      <button class="topbar__window-btn" title="Minimize" aria-label="Minimize">
+        <svg class="icon icon--sm"><use href="#icon-minus"/></svg>
+      </button>
+      <button class="topbar__window-btn" title="Maximize" aria-label="Maximize">
+        <svg class="icon icon--sm"><use href="#icon-square"/></svg>
+      </button>
+      <button class="topbar__window-btn" title="Close" aria-label="Close">
+        <svg class="icon icon--sm"><use href="#icon-x"/></svg>
+      </button>
+    </header>
+    <div class="patient-list">
+      <table class="patient-table">
+        <thead>
+          <tr>
+            <th class="patient-table__th">Patient Name</th>
+            <th class="patient-table__th">Type</th>
+            <th class="patient-table__th">Date</th>
+            <th class="patient-table__th">Status</th>
+          </tr>
+        </thead>
+        <tbody id="patient-table-body">
+          <!-- Rows populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Scan View -->
+  <div class="view view--scan" id="view-scan">
   <!-- TopBar -->
   <header class="topbar">
+    <button class="topbar__back" id="btn-back" title="Back to patient list">
+      <svg class="icon icon--sm"><use href="#icon-arrow-left"/></svg>
+    </button>
     <span class="topbar__brand">Scanner X</span>
     <span class="topbar__divider">|</span>
     <button class="topbar__case-name" id="btn-edit-case" title="Edit case name">
@@ -345,7 +391,21 @@
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
       <polyline points="9,12 11,14 15,10"/>
     </symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </symbol>
+    <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"/>
+      <polyline points="12,19 5,12 12,5"/>
+    </symbol>
   </svg>
+
+  </div><!-- end view--scan -->
 
   <script src="app.js"></script>
 </body>
