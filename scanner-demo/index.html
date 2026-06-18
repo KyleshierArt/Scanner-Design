@@ -121,19 +121,19 @@
     <!-- Floating stage navigation bar -->
     <nav class="stage-bar" aria-label="Scan stages">
       <button class="stage-bar__pill stage-bar__pill--active" data-stage="maxilla" aria-current="step">
-        <svg class="icon icon--md icon--filled"><use href="#icon-maxilla"/></svg>
+        <img class="stage-bar__icon" src="icons/Maxilla.png" alt="" />
         Maxilla
       </button>
       <button class="stage-bar__pill" data-stage="mandible">
-        <svg class="icon icon--md"><use href="#icon-mandible"/></svg>
+        <img class="stage-bar__icon" src="icons/Mandible.png" alt="" />
         Mandible
       </button>
       <button class="stage-bar__pill" data-stage="occlusion">
-        <svg class="icon icon--md"><use href="#icon-occlusion"/></svg>
+        <img class="stage-bar__icon" src="icons/navbite.png" alt="" />
         Occlusion
       </button>
       <button class="stage-bar__pill" data-stage="complete">
-        <svg class="icon icon--md"><use href="#icon-check-circle"/></svg>
+        <img class="stage-bar__icon" src="icons/checkmark.png" alt="" />
         Complete
       </button>
     </nav>
@@ -143,12 +143,13 @@
       <div class="tool-palette__tools" id="rail-tools">
         <!-- Tools populated by JS -->
       </div>
-      <button class="device-status device-status--disconnected" id="btn-device" title="Device: Offline (click to cycle mock)">
-        <span class="device-status__dot"></span>
-        <svg class="icon icon--sm"><use href="#icon-unlink"/></svg>
-        <span class="device-status__label">Offline</span>
-      </button>
     </aside>
+
+    <!-- Device status button (separate from tool palette) -->
+    <button class="device-status-btn device-status--disconnected" id="btn-device" title="Device: Disconnected (click to toggle)">
+      <img class="device-status-btn__icon" src="icons/link-2.png" alt="" />
+      <span class="device-status-btn__label" id="device-status-label">Offline</span>
+    </button>
 
     <!-- CameraPreview -->
     <div class="camera" id="camera-preview">

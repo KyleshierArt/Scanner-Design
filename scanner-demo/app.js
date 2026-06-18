@@ -56,7 +56,7 @@
 
   // ── Constants ──
 
-  const ICON_ASSET_BASE = "../icon-design/";
+  const ICON_ASSET_BASE = "icons/";
 
   const TREATMENT_ICONS = {
     "Orthodontics": "braces.png",
@@ -174,13 +174,13 @@
 
   // Tool definitions by stage
   const TOOLS = [
-    { id: "crop", icon: "../icon-design/scalpel.png", label: "Crop" },
-    { id: "undercut", icon: "../icon-design/toothache_arrows.png", label: "Undercut" },
-    { id: "bitecheck", icon: "../icon-design/bite-check.png", label: "Bite Check" },
-    { id: "implant", icon: "../icon-design/dental-implant.png", label: "Implant" },
-    { id: "screenshot", icon: "../icon-design/photo-camera.png", label: "Screenshot" },
-    { id: "lock", icon: "../icon-design/lock.png", label: "Lock" },
-    { id: "delete", icon: "../icon-design/trash.png", label: "Delete" },
+    { id: "crop", icon: "icons/scalpel.png", label: "Trim" },
+    { id: "undercut", icon: "icons/toothache_arrows.png", label: "Undercut" },
+    { id: "bitecheck", icon: "icons/bite-check.png", label: "Bite Check" },
+    { id: "implant", icon: "icons/dental-implant.png", label: "Implant" },
+    { id: "screenshot", icon: "icons/photo-camera.png", label: "Screenshot" },
+    { id: "lock", icon: "icons/lock.png", label: "Lock" },
+    { id: "delete", icon: "icons/delete.png", label: "Delete" },
   ];
 
   // ── State ──
@@ -307,8 +307,7 @@
   }
 
   function cycleDeviceStatus() {
-    const next = DEVICE_NEXT[state.deviceStatus];
-    if (next) setDeviceStatus(next);
+    setDeviceStatus(state.deviceStatus === "connected" ? "disconnected" : "connected");
   }
 
   function startScan() {
@@ -579,17 +578,6 @@
 
       pill.setAttribute("aria-current", isActive ? "step" : "");
 
-      // Update icon: scanned → check-circle, active → filled variant, else → default
-      const svg = pill.querySelector("svg use");
-      if (svg) {
-        if (isScanned) {
-          svg.setAttribute("href", "#icon-check-circle");
-        } else if (isActive) {
-          svg.setAttribute("href", "#icon-" + key + "-filled");
-        } else {
-          svg.setAttribute("href", "#icon-" + key);
-        }
-      }
     });
   }
 
@@ -598,8 +586,8 @@
     container.innerHTML = "";
 
     TOOLS.forEach(function (tool, i) {
-      // Divider before delete (last tool)
-      if (i === TOOLS.length - 1) {
+      // Divider after crop (index 0), before screenshot (index 4)
+      if (i === 1 || i === 4) {
         const div = document.createElement("span");
         div.className = "tool-palette__divider";
         container.appendChild(div);
@@ -625,18 +613,17 @@
   function renderDeviceStatus() {
     const btn = el.btnDevice();
     if (!btn) return;
-    const status = state.deviceStatus;
 
-    // Remove all status classes
-    btn.className = "device-status device-status--" + status;
+    const connected = state.deviceStatus === "connected";
+    btn.className = "device-status-btn device-status--" + (connected ? "connected" : "disconnected");
 
-    const icon = btn.querySelector("svg use");
+    const icon = btn.querySelector(".device-status-btn__icon");
     if (icon) {
-      icon.setAttribute("href", status === "disconnected" || status === "error" ? "#icon-unlink" : "#icon-link");
+      icon.src = connected ? "icons/link.png" : "icons/link-2.png";
     }
 
-    const label = btn.querySelector(".device-status__label");
-    if (label) label.textContent = DEVICE_LABELS[status];
+    const label = btn.querySelector(".device-status-btn__label");
+    if (label) label.textContent = connected ? "Connected" : "Offline";
   }
 
   function renderCanvas() {
