@@ -56,7 +56,7 @@
             <div class="patient-detail__actions">
               <div class="scanner-badge scanner-badge--disconnected" id="scanner-badge" title="Scanner status">
                 <span class="scanner-badge__dot"></span>
-                <span class="scanner-badge__label" id="scanner-badge-label">Offline</span>
+                <span class="scanner-badge__label" id="scanner-badge-label">Disconnected</span>
               </div>
               <button class="patient-detail__new-btn" id="btn-new-case" title="New Scan">
                 <svg class="icon icon--sm"><use href="#icon-plus"/></svg>
@@ -91,17 +91,12 @@
     <!-- Floating header chip (top-left) -->
     <div class="header-chip">
       <button class="header-chip__back" id="btn-back" title="Back to patient list">
-        <svg class="icon icon--sm"><use href="#icon-arrow-left"/></svg>
+        <img class="icon icon--md" src="icons/back-2.png" alt=""/>
+        <span>Back</span>
       </button>
-      <span class="header-chip__brand">Scanner X</span>
-      <span class="header-chip__divider">·</span>
-      <button class="header-chip__case-name" id="btn-edit-case" title="Edit case name">
-        <svg class="icon icon--xs"><use href="#icon-pencil"/></svg>
-        <span id="case-name-display">New Case — Maxilla</span>
-      </button>
-      <button class="header-chip__save" id="btn-save" title="Save case">
-        <svg class="icon icon--sm"><use href="#icon-save"/></svg>
-        Save
+      <button class="header-chip__case-name" id="btn-edit-patient" title="Edit patient">
+        <span id="patient-name-display">Patient</span>
+        <img class="icon icon--md" src="icons/pencil.png" alt="Edit"/>
       </button>
     </div>
 
@@ -147,21 +142,17 @@
 
     <!-- Device status button (separate from tool palette) -->
     <button class="device-status-btn device-status--disconnected" id="btn-device" title="Device: Disconnected (click to toggle)">
-      <img class="device-status-btn__icon" src="icons/link-2.png" alt="" />
-      <span class="device-status-btn__label" id="device-status-label">Offline</span>
+      <img class="device-status-btn__icon" src="icons/link.png" alt="" />
+      <span class="device-status-btn__label" id="device-status-label">Disconnected</span>
     </button>
 
     <!-- CameraPreview -->
     <div class="camera" id="camera-preview">
       <div class="camera__header">
         <div class="camera__header-left">
-          <svg class="icon icon--xs"><use href="#icon-camera"/></svg>
-          <span>Live Camera</span>          <span class="camera__fps">-- fps</span>
+          <span>Live Camera</span>
         </div>
         <div class="camera__actions">
-          <button class="camera__btn" title="Screenshot">
-            <svg class="icon icon--sm"><use href="#icon-camera"/></svg>
-          </button>
           <button class="camera__btn" id="btn-camera-size" title="Enlarge">
             <svg class="icon icon--sm"><use href="#icon-maximize"/></svg>
           </button>

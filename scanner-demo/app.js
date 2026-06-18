@@ -76,7 +76,7 @@
   };
 
   const DEVICE_LABELS = {
-    disconnected: "Offline",
+    disconnected: "Disconnected",
     ready: "Ready",
     scanning: "Scan",
     paused: "Pause",
@@ -174,7 +174,7 @@
 
   // Tool definitions by stage
   const TOOLS = [
-    { id: "crop", icon: "icons/scalpel.png", label: "Trim" },
+    { id: "crop", icon: "icons/scissors.png", label: "Trim" },
     { id: "undercut", icon: "icons/toothache_arrows.png", label: "Undercut" },
     { id: "bitecheck", icon: "icons/bite-check.png", label: "Bite Check" },
     { id: "implant", icon: "icons/dental-implant.png", label: "Implant" },
@@ -228,7 +228,7 @@
     searchInput: () => $("#patient-search-input"),
     btnNewCase: () => $("#btn-new-case"),
     btnBack: () => $("#btn-back"),
-    caseNameDisplay: () => $("#case-name-display"),
+    patientNameDisplay: () => $("#patient-name-display"),
     stagePills: () => $$(".stage-bar__pill"),
     railTools: () => $("#rail-tools"),
     btnDevice: () => $("#btn-device"),
@@ -558,9 +558,10 @@
   }
 
   function renderTopBar() {
-    const display = el.caseNameDisplay();
+    const display = el.patientNameDisplay();
     if (display) {
-      display.textContent = state.caseName + " — " + STAGE_LABELS[state.stage];
+      var patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
+      display.textContent = patient ? patient.name : "New Patient";
     }
   }
 
@@ -619,11 +620,11 @@
 
     const icon = btn.querySelector(".device-status-btn__icon");
     if (icon) {
-      icon.src = connected ? "icons/link.png" : "icons/link-2.png";
+      icon.src = connected ? "icons/link-2.png" : "icons/link.png";
     }
 
     const label = btn.querySelector(".device-status-btn__label");
-    if (label) label.textContent = connected ? "Connected" : "Offline";
+    if (label) label.textContent = connected ? "Connected" : "Disconnected";
   }
 
   function renderCanvas() {
@@ -759,7 +760,8 @@
     });
 
     el.btnNewCase().addEventListener("click", function () {
-      openPatient(null);
+      var patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
+      openPatient(patient || null);
     });
 
     el.btnBack().addEventListener("click", backToList);
@@ -847,11 +849,12 @@
     });
 
     // TopBar
-    $("#btn-edit-case").addEventListener("click", function () {
-      openDialog("editCaseName");
+    $("#btn-edit-patient").addEventListener("click", function () {
+      if (state.selectedPatientId) openEditPatient(state.selectedPatientId);
     });
 
-    $("#btn-save").addEventListener("click", function () {
+    var btnSave = document.getElementById("btn-save");
+    if (btnSave) btnSave.addEventListener("click", function () {
       openDialog("saveCase");
     });
 
@@ -908,10 +911,15 @@
         patient.dob = document.getElementById("epf-dob").value || "";
         patient.gender = document.getElementById("epf-gender").value || "";
         patient.remarks = document.getElementById("epf-remarks").value.trim();
+        if (state.selectedPatientId === patient.id) {
+          state.selectedPatient = patient;
+          state.caseName = patient.name;
+        }
       }
       overlay.hidden = true;
       renderPatientList();
       renderPatientDetail();
+      render();
     });
 
     // Delete patient dialog
