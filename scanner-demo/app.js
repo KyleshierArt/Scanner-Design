@@ -4,14 +4,47 @@
   // ── Patient data ──
 
   const PATIENTS = [
-    { id: 1, name: "John Miller", type: "Orthodontics", date: "2026-06-13", status: "scanning" },
-    { id: 2, name: "Sarah Chen", type: "Crown & Bridge", date: "2026-06-12", status: "completed" },
-    { id: 3, name: "Michael Brown", type: "Orthodontics", date: "2026-06-12", status: "pending" },
-    { id: 4, name: "Emily Davis", type: "Implant", date: "2026-06-11", status: "sent" },
-    { id: 5, name: "David Wilson", type: "Crown & Bridge", date: "2026-06-11", status: "completed" },
-    { id: 6, name: "Lisa Wang", type: "Denture", date: "2026-06-10", status: "pending" },
-    { id: 7, name: "James Taylor", type: "Orthodontics", date: "2026-06-09", status: "sent" },
-    { id: 8, name: "Anna Kim", type: "Implant", date: "2026-06-08", status: "completed" },
+    { id: 1, name: "John Miller", type: "Orthodontics", date: "2026-06-13", status: "scanning",
+      scans: [
+        { id: 101, label: "Upper Arch", stage: "Maxilla", date: "2026-06-13", time: "14:32" },
+        { id: 102, label: "Lower Arch", stage: "Mandible", date: "2026-06-12", time: "10:15" },
+      ] },
+    { id: 2, name: "Sarah Chen", type: "Crown & Bridge", date: "2026-06-12", status: "completed",
+      scans: [
+        { id: 201, label: "Upper Arch", stage: "Maxilla", date: "2026-06-12", time: "09:20" },
+        { id: 202, label: "Lower Arch", stage: "Mandible", date: "2026-06-12", time: "09:45" },
+        { id: 203, label: "Bite Registration", stage: "Occlusion", date: "2026-06-12", time: "10:05" },
+      ] },
+    { id: 3, name: "Michael Brown", type: "Orthodontics", date: "2026-06-12", status: "pending",
+      scans: [] },
+    { id: 4, name: "Emily Davis", type: "Implant", date: "2026-06-11", status: "sent",
+      scans: [
+        { id: 401, label: "Upper Arch", stage: "Maxilla", date: "2026-06-11", time: "16:30" },
+        { id: 402, label: "Lower Arch", stage: "Mandible", date: "2026-06-11", time: "16:55" },
+        { id: 403, label: "Bite Registration", stage: "Occlusion", date: "2026-06-11", time: "17:10" },
+      ] },
+    { id: 5, name: "David Wilson", type: "Crown & Bridge", date: "2026-06-11", status: "completed",
+      scans: [
+        { id: 501, label: "Upper Arch", stage: "Maxilla", date: "2026-06-11", time: "11:00" },
+        { id: 502, label: "Lower Arch", stage: "Mandible", date: "2026-06-11", time: "11:20" },
+        { id: 503, label: "Bite Registration", stage: "Occlusion", date: "2026-06-11", time: "11:35" },
+      ] },
+    { id: 6, name: "Lisa Wang", type: "Denture", date: "2026-06-10", status: "pending",
+      scans: [
+        { id: 601, label: "Upper Arch", stage: "Maxilla", date: "2026-06-10", time: "08:45" },
+      ] },
+    { id: 7, name: "James Taylor", type: "Orthodontics", date: "2026-06-09", status: "sent",
+      scans: [
+        { id: 701, label: "Upper Arch", stage: "Maxilla", date: "2026-06-09", time: "15:10" },
+        { id: 702, label: "Lower Arch", stage: "Mandible", date: "2026-06-09", time: "15:30" },
+        { id: 703, label: "Bite Registration", stage: "Occlusion", date: "2026-06-09", time: "15:50" },
+      ] },
+    { id: 8, name: "Anna Kim", type: "Implant", date: "2026-06-08", status: "completed",
+      scans: [
+        { id: 801, label: "Upper Arch", stage: "Maxilla", date: "2026-06-08", time: "13:20" },
+        { id: 802, label: "Lower Arch", stage: "Mandible", date: "2026-06-08", time: "13:40" },
+        { id: 803, label: "Bite Registration", stage: "Occlusion", date: "2026-06-08", time: "14:00" },
+      ] },
   ];
 
   const STATUS_LABELS = {
@@ -22,6 +55,16 @@
   };
 
   // ── Constants ──
+
+  const ICON_ASSET_BASE = "../icon-design/";
+
+  const TREATMENT_ICONS = {
+    "Orthodontics": "braces.png",
+    "Crown & Bridge": "crown.png",
+    "Implant": "enamel.png",
+    "Denture": "denture.png",
+    "General": "filling.png",
+  };
 
   const STAGE_ORDER = ["maxilla", "mandible", "occlusion", "complete"];
 
@@ -130,33 +173,22 @@
   };
 
   // Tool definitions by stage
-  const TOOLS = {
-    maxilla: [
-      { id: "smartscan", icon: "#icon-wand", label: "Smart Scan" },
-      { id: "crop", icon: "#icon-crop", label: "Crop" },
-      { id: "screenshot", icon: "#icon-camera", label: "Screenshot" },
-    ],
-    mandible: [
-      { id: "smartscan", icon: "#icon-wand", label: "Smart Scan" },
-      { id: "tissue", icon: "#icon-leaf", label: "Tissue Filter" },
-      { id: "crop", icon: "#icon-crop", label: "Crop" },
-      { id: "screenshot", icon: "#icon-camera", label: "Screenshot" },
-    ],
-    occlusion: [
-      { id: "screenshot", icon: "#icon-camera", label: "Screenshot" },
-    ],
-    complete: [
-      { id: "quality", icon: "#icon-shield", label: "Quality Check" },
-      { id: "screenshot", icon: "#icon-camera", label: "Screenshot" },
-      { id: "undercut", icon: "#icon-undercut", label: "Undercut" },
-    ],
-  };
+  const TOOLS = [
+    { id: "crop", icon: "../icon-design/scalpel.png", label: "Crop" },
+    { id: "undercut", icon: "../icon-design/toothache_arrows.png", label: "Undercut" },
+    { id: "bitecheck", icon: "../icon-design/bite-check.png", label: "Bite Check" },
+    { id: "implant", icon: "../icon-design/dental-implant.png", label: "Implant" },
+    { id: "screenshot", icon: "../icon-design/photo-camera.png", label: "Screenshot" },
+    { id: "lock", icon: "../icon-design/lock.png", label: "Lock" },
+    { id: "delete", icon: "../icon-design/trash.png", label: "Delete" },
+  ];
 
   // ── State ──
 
   const state = {
     currentView: "patientList",
     searchQuery: "",
+    selectedPatientId: null,
     selectedPatient: null,
     stage: "maxilla",
     stageData: { maxilla: "active", mandible: "pending", occlusion: "pending", complete: "disabled" },
@@ -171,6 +203,10 @@
 
   let scanInterval = null;
 
+  function treatmentIconFor(type) {
+    return ICON_ASSET_BASE + (TREATMENT_ICONS[type] || "filling.png");
+  }
+
   // ── DOM refs ──
 
   const $ = (sel) => document.querySelector(sel);
@@ -179,15 +215,22 @@
   const el = {
     viewPatientList: () => $("#view-patient-list"),
     viewScan: () => $("#view-scan"),
-    patientTableBody: () => $("#patient-table-body"),
+    patientCardList: () => $("#patient-card-list"),
+    patientCount: () => $("#patient-count"),
+    patientDetailEmpty: () => $("#patient-detail-empty"),
+    patientDetailContent: () => $("#patient-detail-content"),
+    detailPatientName: () => $("#detail-patient-name"),
+    detailPatientMeta: () => $("#detail-patient-meta"),
+    scanGallery: () => $("#scan-gallery"),
+    scannerBadge: () => $("#scanner-badge"),
+    scannerBadgeLabel: () => $("#scanner-badge-label"),
+    btnAddPatient: () => $("#btn-add-patient"),
     searchInput: () => $("#patient-search-input"),
     btnNewCase: () => $("#btn-new-case"),
     btnBack: () => $("#btn-back"),
     caseNameDisplay: () => $("#case-name-display"),
-    stagePills: () => $$(".stagenav__pill"),
+    stagePills: () => $$(".stage-bar__pill"),
     railTools: () => $("#rail-tools"),
-    railPanel: () => $("#rail-panel"),
-    railPanelContent: () => $("#rail-panel-content"),
     btnDevice: () => $("#btn-device"),
     guidance: () => $("#guidance"),
     scanProgress: () => $("#scan-progress"),
@@ -217,6 +260,7 @@
       listEl.classList.add("view--active");
       scanEl.classList.remove("view--active");
       renderPatientList();
+      renderPatientDetail();
     } else {
       listEl.classList.remove("view--active");
       scanEl.classList.add("view--active");
@@ -225,6 +269,7 @@
 
   function openPatient(patient) {
     state.selectedPatient = patient;
+    state.selectedPatientId = patient ? patient.id : null;
     state.caseName = patient ? patient.name : "New Case";
     state.stage = "maxilla";
     state.stageData = { maxilla: "active", mandible: "pending", occlusion: "pending", complete: "disabled" };
@@ -350,32 +395,156 @@
 
   // ── Render functions ──
 
+  function selectPatient(id) {
+    state.selectedPatientId = id;
+    renderPatientList();
+    renderPatientDetail();
+  }
+
+  function openEditPatient(id) {
+    var patient = PATIENTS.find(function (p) { return p.id === id; });
+    if (!patient) return;
+    var overlay = document.getElementById("edit-patient-overlay");
+    document.getElementById("epf-id").value = "P-" + String(patient.id).padStart(4, "0");
+    document.getElementById("epf-name").value = patient.name;
+    document.getElementById("epf-dob").value = patient.dob || "";
+    document.getElementById("epf-gender").value = patient.gender || "";
+    document.getElementById("epf-remarks").value = patient.remarks || "";
+    overlay.dataset.patientId = id;
+    overlay.hidden = false;
+    setTimeout(function () { document.getElementById("epf-name").focus(); }, 50);
+  }
+
+  function confirmDeletePatient(id) {
+    var patient = PATIENTS.find(function (p) { return p.id === id; });
+    if (!patient) return;
+    var overlay = document.getElementById("delete-patient-overlay");
+    document.getElementById("dp-name").textContent = patient.name;
+    overlay.dataset.patientId = id;
+    overlay.hidden = false;
+  }
+
+  var openMenuPatientId = null;
+
+  function closePatientMenu() {
+    openMenuPatientId = null;
+    renderPatientList();
+  }
+
   function renderPatientList() {
-    const tbody = el.patientTableBody();
-    if (!tbody) return;
+    const container = el.patientCardList();
+    if (!container) return;
     const q = state.searchQuery.toLowerCase();
     const filtered = PATIENTS.filter(function (p) {
       return p.name.toLowerCase().includes(q) ||
         p.type.toLowerCase().includes(q) ||
         STATUS_LABELS[p.status].toLowerCase().includes(q);
     });
-    tbody.innerHTML = filtered.map(function (p) {
-      return '<tr class="patient-table__tr" data-patient-id="' + p.id + '">' +
-        '<td class="patient-table__td patient-table__td--name">' + p.name + '</td>' +
-        '<td class="patient-table__td">' + p.type + '</td>' +
-        '<td class="patient-table__td">' + p.date + '</td>' +
-        '<td class="patient-table__td"><span class="patient-table__status patient-table__status--' + p.status + '">' +
-        '<span class="patient-table__status-dot"></span>' + STATUS_LABELS[p.status] + '</span></td>' +
-        '</tr>';
+
+    el.patientCount().textContent = filtered.length;
+
+    container.innerHTML = filtered.map(function (p) {
+      const selected = state.selectedPatientId === p.id;
+      const menuOpen = openMenuPatientId === p.id;
+      return '<div class="patient-card' + (selected ? ' patient-card--selected' : '') + '" data-patient-id="' + p.id + '">' +
+        '<img class="patient-card__icon" src="' + treatmentIconFor(p.type) + '" alt="" loading="lazy">' +
+        '<div class="patient-card__body">' +
+        '<div class="patient-card__name">' + p.name + '</div>' +
+        '<div class="patient-card__meta">' +
+        '<span class="patient-card__type">' + p.type + '</span>' +
+        '<span class="patient-card__dot"></span>' +
+        '<span class="patient-card__status patient-card__status--' + p.status + '">' + STATUS_LABELS[p.status] + '</span>' +
+        '</div>' +
+        '</div>' +
+        '<div class="patient-card__overflow">' +
+        '<button class="patient-card__overflow-btn" data-action="menu" data-patient-id="' + p.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
+        (menuOpen ? '<div class="patient-card__menu">' +
+        '<button class="patient-card__menu-item" data-action="edit" data-patient-id="' + p.id + '"><svg class="icon icon--sm"><use href="#icon-pencil"/></svg>Edit</button>' +
+        '<button class="patient-card__menu-item patient-card__menu-item--delete" data-action="delete" data-patient-id="' + p.id + '"><svg class="icon icon--sm"><use href="#icon-trash"/></svg>Delete</button>' +
+        '</div>' : '') +
+        '</div>' +
+        '</div>';
     }).join("");
 
-    tbody.querySelectorAll(".patient-table__tr").forEach(function (row) {
-      row.addEventListener("click", function () {
-        var id = parseInt(row.dataset.patientId);
-        var patient = PATIENTS.find(function (p) { return p.id === id; });
-        if (patient) openPatient(patient);
+    container.querySelectorAll(".patient-card").forEach(function (card) {
+      card.addEventListener("click", function (e) {
+        var actionBtn = e.target.closest("[data-action]");
+        if (actionBtn) {
+          e.stopPropagation();
+          var action = actionBtn.dataset.action;
+          var id = parseInt(actionBtn.dataset.patientId);
+          if (action === "menu") {
+            openMenuPatientId = openMenuPatientId === id ? null : id;
+            renderPatientList();
+          } else if (action === "edit") {
+            closePatientMenu();
+            openEditPatient(id);
+          } else if (action === "delete") {
+            closePatientMenu();
+            confirmDeletePatient(id);
+          }
+          return;
+        }
+        var id = parseInt(card.dataset.patientId);
+        selectPatient(id);
       });
     });
+  }
+
+  function renderPatientDetail() {
+    const emptyEl = el.patientDetailEmpty();
+    const contentEl = el.patientDetailContent();
+
+    if (!state.selectedPatientId) {
+      emptyEl.hidden = false;
+      contentEl.hidden = true;
+      return;
+    }
+
+    const patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
+    if (!patient) {
+      emptyEl.hidden = false;
+      contentEl.hidden = true;
+      return;
+    }
+
+    emptyEl.hidden = true;
+    contentEl.hidden = false;
+
+    el.detailPatientName().textContent = patient.name;
+    el.detailPatientMeta().textContent = patient.type + "  ·  " + patient.date;
+
+    // Scanner badge
+    renderScannerBadge();
+
+    // Scan gallery
+    const gallery = el.scanGallery();
+    gallery.innerHTML = patient.scans.map(function (s) {
+      return '<div class="scan-card" data-scan-id="' + s.id + '">' +
+        '<div class="scan-card__preview">' +
+        '<img class="scan-card__preview-icon" src="' + treatmentIconFor(patient.type) + '" alt="" loading="lazy">' +
+        '<span class="scan-card__stage-tag">' + s.stage + '</span>' +
+        '</div>' +
+        '<div class="scan-card__info">' +
+        '<div class="scan-card__label">' + s.label + '</div>' +
+        '<div class="scan-card__date">' + s.date + '  ' + s.time + '</div>' +
+        '</div>' +
+        '</div>';
+    }).join("");
+
+    if (patient.scans.length === 0) {
+      gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-text-subtle);font:var(--fs-caption);padding:48px 0;">No scan records yet</div>';
+    }
+  }
+
+  function renderScannerBadge() {
+    const badge = el.scannerBadge();
+    const label = el.scannerBadgeLabel();
+    if (!badge || !label) return;
+
+    const status = state.deviceStatus;
+    badge.className = "scanner-badge scanner-badge--" + status;
+    label.textContent = DEVICE_LABELS[status];
   }
 
   function render() {
@@ -404,9 +573,9 @@
       const isScanned = stageState === "scanned";
 
       // Reset classes
-      pill.className = "stagenav__pill";
-      if (isActive) pill.classList.add("stagenav__pill--active");
-      else if (isScanned) pill.classList.add("stagenav__pill--scanned");
+      pill.className = "stage-bar__pill";
+      if (isActive) pill.classList.add("stage-bar__pill--active");
+      else if (isScanned) pill.classList.add("stage-bar__pill--scanned");
 
       pill.setAttribute("aria-current", isActive ? "step" : "");
 
@@ -425,86 +594,32 @@
   }
 
   function renderLeftRail() {
-    const tools = TOOLS[state.stage] || [];
     const container = el.railTools();
     container.innerHTML = "";
 
-    tools.forEach(function (tool, i) {
-      // Add divider before second half
-      if (i > 0 && i === Math.ceil(tools.length / 2)) {
+    TOOLS.forEach(function (tool, i) {
+      // Divider before delete (last tool)
+      if (i === TOOLS.length - 1) {
         const div = document.createElement("span");
-        div.className = "leftrail__divider";
+        div.className = "tool-palette__divider";
         container.appendChild(div);
       }
 
       const btn = document.createElement("button");
-      btn.className = "leftrail__tool-btn";
+      btn.className = "tool-palette__tool-btn";
       if (state.selectedTool === tool.id) {
-        btn.classList.add("leftrail__tool-btn--selected");
+        btn.classList.add("tool-palette__tool-btn--selected");
       }
       btn.title = tool.label;
       btn.setAttribute("aria-label", tool.label);
       btn.setAttribute("aria-pressed", state.selectedTool === tool.id);
-      btn.innerHTML = '<svg class="icon icon--md"><use href="' + tool.icon + '"/></svg>';
+      btn.innerHTML = '<img class="tool-palette__icon" src="' + tool.icon + '" alt="' + tool.label + '">';
       btn.addEventListener("click", function () {
         state.selectedTool = state.selectedTool === tool.id ? null : tool.id;
         renderLeftRail();
-        renderPanel();
       });
       container.appendChild(btn);
     });
-
-    renderPanel();
-  }
-
-  function renderPanel() {
-    const panel = el.railPanel();
-    const content = el.railPanelContent();
-
-    if (!state.selectedTool) {
-      panel.hidden = true;
-      return;
-    }
-
-    panel.hidden = false;
-    content.innerHTML = getPanelHTML(state.selectedTool);
-  }
-
-  function getPanelHTML(panelId) {
-    switch (panelId) {
-      case "smartscan":
-        return '<div class="panel__title">Smart Scan</div>' +
-          '<p class="panel__desc">AI-guided scanning with automatic coverage detection.</p>' +
-          '<label class="panel__label">Mode<select class="panel__select"><option>Auto Detect</option><option>Upper Arch Only</option><option>Lower Arch Only</option></select></label>' +
-          '<div class="panel__actions"><button class="panel__btn">Start Smart Scan</button></div>';
-      case "tissue":
-        return '<div class="panel__title">Tissue Filter</div>' +
-          '<p class="panel__desc">Automatically remove soft tissue from scan data.</p>' +
-          '<label class="panel__label">Sensitivity<input type="range" min="1" max="10" value="5" class="panel__slider"></label>' +
-          '<div class="panel__actions"><button class="panel__btn">Enable</button><button class="panel__btn-secondary">Disable</button></div>';
-      case "crop":
-        return '<div class="panel__title">Crop</div>' +
-          '<label class="panel__label">Radius<input type="range" min="1" max="20" value="5" class="panel__slider"></label>' +
-          '<div class="panel__actions"><button class="panel__btn">Apply</button><button class="panel__btn-secondary">Cancel</button></div>';
-      case "screenshot":
-        return '<div class="panel__title">Screenshot</div>' +
-          '<label class="panel__label">Format<select class="panel__select"><option>PNG</option><option>JPEG</option></select></label>' +
-          '<div class="panel__actions"><button class="panel__btn">Capture</button></div>';
-      case "quality":
-        return '<div class="panel__title">Quality Check</div>' +
-          '<p class="panel__desc">Verify scan coverage and data quality.</p>' +
-          '<div class="quality-items">' +
-          '<div class="quality-item"><span>Upper Arch</span><span class="quality-ok">Complete</span></div>' +
-          '<div class="quality-item"><span>Lower Arch</span><span class="quality-ok">Complete</span></div>' +
-          '<div class="quality-item"><span>Bite Registration</span><span class="quality-ok">Complete</span></div>' +
-          '</div>';
-      case "undercut":
-        return '<div class="panel__title">Undercut Check</div>' +
-          '<label class="panel__label">Sensitivity<input type="range" min="1" max="10" value="5" class="panel__slider"></label>' +
-          '<div class="panel__actions"><button class="panel__btn">Show</button><button class="panel__btn-secondary">Hide</button></div>';
-      default:
-        return "";
-    }
   }
 
   function renderDeviceStatus() {
@@ -629,7 +744,8 @@
     const input = el.dialogInput();
     if (meta.input) {
       input.hidden = false;
-      input.value = state.caseName;
+      input.placeholder = meta.inputPlaceholder || "";
+      input.value = state.dialog === "addPatient" ? "" : state.caseName;
       setTimeout(function () { input.focus(); }, 50);
     } else {
       input.hidden = true;
@@ -671,6 +787,12 @@
     // Device status cycle
     el.btnDevice().addEventListener("click", cycleDeviceStatus);
 
+    // Scanner badge cycle (patient list view)
+    el.scannerBadge().addEventListener("click", function () {
+      cycleDeviceStatus();
+      renderScannerBadge();
+    });
+
     // Scan controls
     el.btnStart().addEventListener("click", function () {
       if (isScanning()) pauseScan();
@@ -696,6 +818,45 @@
       btn.addEventListener("click", function () {
         setBiteType(btn.dataset.bite);
       });
+    });
+
+    // Add patient button
+    el.btnAddPatient().addEventListener("click", function () {
+      var nextId = PATIENTS.length ? Math.max.apply(null, PATIENTS.map(function (p) { return p.id; })) + 1 : 1;
+      document.getElementById("pf-id").value = "P-" + String(nextId).padStart(4, "0");
+      document.getElementById("pf-name").value = "";
+      document.getElementById("pf-dob").value = "";
+      document.getElementById("pf-gender").value = "";
+      document.getElementById("pf-remarks").value = "";
+      document.getElementById("add-patient-overlay").hidden = false;
+      setTimeout(function () { document.getElementById("pf-name").focus(); }, 50);
+    });
+
+    document.getElementById("ap-cancel").addEventListener("click", function () {
+      document.getElementById("add-patient-overlay").hidden = true;
+    });
+
+    document.getElementById("add-patient-overlay").addEventListener("click", function (e) {
+      if (e.target === this) this.hidden = true;
+    });
+
+    document.getElementById("ap-confirm").addEventListener("click", function () {
+      var name = document.getElementById("pf-name").value.trim();
+      if (!name) {
+        document.getElementById("pf-name").focus();
+        return;
+      }
+      var newId = PATIENTS.length ? Math.max.apply(null, PATIENTS.map(function (p) { return p.id; })) + 1 : 1;
+      var today = new Date();
+      var dateStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+      var dob = document.getElementById("pf-dob").value || "";
+      var gender = document.getElementById("pf-gender").value || "";
+      var remarks = document.getElementById("pf-remarks").value.trim();
+      PATIENTS.push({ id: newId, name: name, type: "General", date: dateStr, status: "pending", scans: [], dob: dob, gender: gender, remarks: remarks });
+      state.selectedPatientId = newId;
+      document.getElementById("add-patient-overlay").hidden = true;
+      renderPatientList();
+      renderPatientDetail();
     });
 
     // TopBar
@@ -737,10 +898,75 @@
 
     $("#dialog-cancel").addEventListener("click", closeDialog);
 
-    // Escape key for dialog
+    // Edit patient dialog
+    document.getElementById("ep-cancel").addEventListener("click", function () {
+      document.getElementById("edit-patient-overlay").hidden = true;
+    });
+
+    document.getElementById("edit-patient-overlay").addEventListener("click", function (e) {
+      if (e.target === this) this.hidden = true;
+    });
+
+    document.getElementById("ep-confirm").addEventListener("click", function () {
+      var overlay = document.getElementById("edit-patient-overlay");
+      var id = parseInt(overlay.dataset.patientId);
+      var name = document.getElementById("epf-name").value.trim();
+      if (!name) {
+        document.getElementById("epf-name").focus();
+        return;
+      }
+      var patient = PATIENTS.find(function (p) { return p.id === id; });
+      if (patient) {
+        patient.name = name;
+        patient.dob = document.getElementById("epf-dob").value || "";
+        patient.gender = document.getElementById("epf-gender").value || "";
+        patient.remarks = document.getElementById("epf-remarks").value.trim();
+      }
+      overlay.hidden = true;
+      renderPatientList();
+      renderPatientDetail();
+    });
+
+    // Delete patient dialog
+    document.getElementById("dp-cancel").addEventListener("click", function () {
+      document.getElementById("delete-patient-overlay").hidden = true;
+    });
+
+    document.getElementById("delete-patient-overlay").addEventListener("click", function (e) {
+      if (e.target === this) this.hidden = true;
+    });
+
+    document.getElementById("dp-confirm").addEventListener("click", function () {
+      var overlay = document.getElementById("delete-patient-overlay");
+      var id = parseInt(overlay.dataset.patientId);
+      var idx = PATIENTS.findIndex(function (p) { return p.id === id; });
+      if (idx !== -1) PATIENTS.splice(idx, 1);
+      if (state.selectedPatientId === id) {
+        state.selectedPatientId = null;
+      }
+      overlay.hidden = true;
+      renderPatientList();
+      renderPatientDetail();
+    });
+
+    // Close patient menu when clicking outside
+    document.addEventListener("click", function (e) {
+      if (openMenuPatientId !== null && !e.target.closest(".patient-card__overflow")) {
+        closePatientMenu();
+      }
+    });
+
+    // Escape key for dialogs
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && state.dialog) {
-        closeDialog();
+      if (e.key === "Escape") {
+        if (state.dialog) closeDialog();
+        var apOverlay = document.getElementById("add-patient-overlay");
+        if (apOverlay && !apOverlay.hidden) apOverlay.hidden = true;
+        var epOverlay = document.getElementById("edit-patient-overlay");
+        if (epOverlay && !epOverlay.hidden) epOverlay.hidden = true;
+        var dpOverlay = document.getElementById("delete-patient-overlay");
+        if (dpOverlay && !dpOverlay.hidden) dpOverlay.hidden = true;
+        if (openMenuPatientId !== null) closePatientMenu();
       }
     });
 

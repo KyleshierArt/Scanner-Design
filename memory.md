@@ -83,6 +83,18 @@ Out of scope for first demo:
 - advanced settings;
 - detailed clinical toolkits.
 
+## Design Direction
+
+BMW corporate design system applied to clinical scanner UI:
+
+- Primary color: BMW Blue #1c69d4 (single action color)
+- Canvas: white (#ffffff) base, dark navy (#1a2129) scan canvas
+- Typography: Inter 700 display + 300 body (BMW Type Next Latin substitute)
+- Rectangular: 0px radius on buttons, cards, inputs, badges
+- No shadows: depth from color-block contrast only
+- Uppercase labels with letter-spacing for badges, tabs, status indicators
+- Reference: `awesome-design-md/bmw/DESIGN.md`
+
 ## Open Questions
 
 - Product brand name and logo usage: use existing `logo.ai` or create temporary mark?
@@ -94,4 +106,4 @@ Out of scope for first demo:
 
 ## Next Implementation Direction
 
-Create a `web-prototype` app using React, Vite, and TypeScript. Start with static mocked state and component routes. Keep the UI deterministic so screenshots can later be exported for developers.
+Continue building in `scanner-demo/` using plain HTML, CSS, and JavaScript. Start with static mocked state and deterministic component layout. Keep the UI deterministic so screenshots can later be exported for developers.
