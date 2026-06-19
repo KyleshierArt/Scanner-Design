@@ -597,6 +597,19 @@
         '</div>';
     }).join("");
 
+    if (filtered.length === 0) {
+      var isNoData = PATIENTS.length === 0;
+      var emptyMsg = isNoData
+        ? "No patients yet. Add your first patient to get started."
+        : "No patients match your search.";
+      var emptyImg = isNoData ? "NoData-Scene.svg" : "SearchFolder-Scene.svg";
+      container.innerHTML = '<div class="patient-list-empty">' +
+        '<img class="patient-list-empty__illustration" src="' + emptyImg + '" alt="" loading="lazy">' +
+        '<p class="patient-list-empty__desc">' + emptyMsg + '</p>' +
+        '</div>';
+      return;
+    }
+
     container.querySelectorAll(".patient-card").forEach(function (card) {
       card.addEventListener("click", function (e) {
         var actionBtn = e.target.closest("[data-action]");
