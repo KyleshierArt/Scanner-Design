@@ -91,12 +91,16 @@
     <!-- Floating header chip (top-left) -->
     <div class="header-chip">
       <button class="header-chip__back" id="btn-back" title="Back to patient list">
-        <img class="icon icon--md" src="icons/back-2.png" alt=""/>
+        <img class="icon icon--md" src="icons/back-arrow.png" alt=""/>
         <span>Back</span>
       </button>
       <button class="header-chip__case-name" id="btn-edit-patient" title="Edit patient">
         <span id="patient-name-display">Patient</span>
         <img class="icon icon--md" src="icons/pencil.png" alt="Edit"/>
+      </button>
+      <button class="header-chip__save" id="btn-save" title="Save case">
+        <img class="icon icon--md" src="icons/save1.png" alt=""/>
+        <span>Save</span>
       </button>
     </div>
 
@@ -113,8 +117,18 @@
       </button>
     </div>
 
+    <!-- Floating right-side actions -->
+    <div class="canvas-actions">
+      <button class="canvas-actions__btn" id="btn-reset-view" title="Reset View">
+        <img class="canvas-actions__icon" src="icons/refresh2.png" alt=""/>
+      </button>
+      <button class="canvas-actions__btn canvas-actions__btn--toggle" id="btn-toggle-shading" title="Toggle Shading" aria-pressed="false">
+        <img class="canvas-actions__icon" src="icons/color-palette.png" alt=""/>
+      </button>
+    </div>
+
     <!-- Floating stage navigation bar -->
-    <nav class="stage-bar" aria-label="Scan stages">
+    <nav class="stage-bar" id="stage-bar" aria-label="Scan stages">
       <button class="stage-bar__pill stage-bar__pill--active" data-stage="maxilla" aria-current="step">
         <img class="stage-bar__icon" src="icons/Maxilla.png" alt="" />
         Maxilla
@@ -146,6 +160,33 @@
       <span class="device-status-btn__label" id="device-status-label">Disconnected</span>
     </button>
 
+    <!-- Scan mode switch (intraoral / model) -->
+    <div class="scan-mode" id="scan-mode">
+      <img class="scan-mode__icon" src="icons/smile.png" alt=""/>
+      <span class="scan-mode__label" id="scan-mode-label">Intraoral</span>
+      <button class="scan-mode__switch" id="btn-scan-mode" role="switch" aria-checked="false" aria-label="Scan mode: intraoral or model" title="Switch scan mode"></button>
+    </div>
+
+    <!-- Occlusion side toggle (left/right tooth scan) -->
+    <button class="occlusion-side-toggle" id="occlusion-side-toggle" hidden data-side="left" title="Scan left side">
+      <img class="occlusion-side-toggle__half occlusion-side-toggle__half--left" src="icons/navbite.png" alt=""/>
+      <img class="occlusion-side-toggle__half occlusion-side-toggle__half--right" src="icons/navbite.png" alt=""/>
+    </button>
+
+    <!-- Start/Pause scan button (bottom center) -->
+    <button class="scan-start-btn" id="btn-start" title="Start Scan">
+      <img class="scan-start-btn__icon" id="btn-start-icon" src="icons/play.png" alt=""/>
+      <span class="scan-start-btn__label" id="btn-start-label">Start</span>
+    </button>
+
+    <!-- Scan info bar (above camera preview) -->
+    <div class="scan-info-bar" id="scan-info-bar">
+      <button class="scan-info-bar__info-btn" id="btn-scan-info" title="Scan guidance">
+        <img class="scan-info-bar__info-icon" src="icons/info.png" alt=""/>
+      </button>
+      <span class="scan-info-bar__frames" id="scan-frames">Frame: 0</span>
+    </div>
+
     <!-- CameraPreview -->
     <div class="camera" id="camera-preview">
       <div class="camera__header">
@@ -161,50 +202,8 @@
       <div class="camera__body">Camera feed placeholder</div>
     </div>
 
-    <!-- ScanProgress -->
-    <div class="scan-progress" id="scan-progress" hidden>
-      <div class="scan-progress__item">
-        <span class="scan-progress__label">Frames</span>
-        <span class="scan-progress__value" id="progress-frames">0</span>
-      </div>
-      <div class="scan-progress__item">
-        <span class="scan-progress__label">Time</span>
-        <span class="scan-progress__value" id="progress-time">00:00</span>
-      </div>
-    </div>
-
-    <!-- Scan guidance -->
-    <div class="scancanvas__guidance" id="guidance">
-      Connect the scanner to begin scanning the upper arch.
-    </div>
-
-    <!-- ScanControls -->
-    <div class="scan-controls" id="scan-controls">
-      <!-- Bite selector (occlusion only) -->
-      <div class="scan-controls__bite-selector" id="bite-selector" hidden>
-        <button class="scan-controls__bite-btn" data-bite="left">Left Bite</button>
-        <button class="scan-controls__bite-btn" data-bite="right">Right Bite</button>
-        <button class="scan-controls__bite-btn scan-controls__bite-btn--active" data-bite="centric">Centric</button>
-      </div>
-      <button class="scan-controls__primary" id="btn-start">
-        <svg class="icon icon--md"><use href="#icon-play"/></svg>
-        Start Scan
-      </button>
-      <button class="scan-controls__secondary" id="btn-reset" disabled>
-        <svg class="icon icon--sm"><use href="#icon-rotate-ccw"/></svg>
-        Reset
-      </button>
-      <button class="scan-controls__danger" id="btn-delete" disabled>
-        <svg class="icon icon--sm"><use href="#icon-trash"/></svg>
-        Delete
-      </button>
-      <button class="scan-controls__secondary" id="btn-complete" disabled>
-        Complete
-      </button>
-      <button class="scan-controls__send" id="btn-send" hidden>
-        <svg class="icon icon--sm"><use href="#icon-send"/></svg>
-        Send to Lab
-      </button>
+    <!-- ScanControls (hidden, pending redesign) -->
+    <div class="scan-controls" id="scan-controls" hidden>
     </div>
   </main>
 

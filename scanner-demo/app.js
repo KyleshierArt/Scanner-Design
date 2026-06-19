@@ -197,6 +197,7 @@
     scanProgress: { frames: 0, elapsed: 0 },
     dialog: null,
     biteType: "centric",
+    occlusionSide: "left",
     selectedTool: null,
     cameraEnlarged: false,
   };
@@ -311,8 +312,8 @@
   }
 
   function startScan() {
-    if (state.deviceStatus !== "ready" && state.deviceStatus !== "paused") return;
-    if (state.deviceStatus === "ready") {
+    if (state.deviceStatus === "scanning") return;
+    if (state.deviceStatus !== "paused") {
       state.scanProgress = { frames: 0, elapsed: 0 };
     }
     state.deviceStatus = "scanning";
@@ -424,10 +425,16 @@
   }
 
   var openMenuPatientId = null;
+  var openMenuScanId = null;
 
   function closePatientMenu() {
     openMenuPatientId = null;
     renderPatientList();
+  }
+
+  function closeScanMenu() {
+    openMenuScanId = null;
+    renderPatientDetail();
   }
 
   function renderPatientList() {
@@ -519,14 +526,25 @@
     // Scan gallery
     const gallery = el.scanGallery();
     gallery.innerHTML = patient.scans.map(function (s) {
+      const menuOpen = openMenuScanId === s.id;
       return '<div class="scan-card" data-scan-id="' + s.id + '">' +
         '<div class="scan-card__preview">' +
         '<img class="scan-card__preview-icon" src="' + treatmentIconFor(patient.type) + '" alt="" loading="lazy">' +
-        '<span class="scan-card__stage-tag">' + s.stage + '</span>' +
         '</div>' +
         '<div class="scan-card__info">' +
+        '<div class="scan-card__info-text">' +
         '<div class="scan-card__label">' + s.label + '</div>' +
         '<div class="scan-card__date">' + s.date + '  ' + s.time + '</div>' +
+        '</div>' +
+        '<div class="scan-card__overflow">' +
+        '<button class="scan-card__overflow-btn" data-action="scan-menu" data-scan-id="' + s.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
+        (menuOpen ? '<div class="scan-card__menu">' +
+        '<button class="scan-card__menu-item" data-action="rescan" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-refresh"/></svg>Rescan</button>' +
+        '<button class="scan-card__menu-item" data-action="view-model" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-focus"/></svg>View Model</button>' +
+        '<button class="scan-card__menu-item" data-action="export" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-save"/></svg>Export</button>' +
+        '<button class="scan-card__menu-item scan-card__menu-item--delete" data-action="delete-scan" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-trash"/></svg>Delete</button>' +
+        '</div>' : '') +
+        '</div>' +
         '</div>' +
         '</div>';
     }).join("");
@@ -534,6 +552,32 @@
     if (patient.scans.length === 0) {
       gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-text-subtle);font:var(--fs-caption);padding:48px 0;">No scan records yet</div>';
     }
+
+    gallery.querySelectorAll(".scan-card").forEach(function (card) {
+      card.addEventListener("click", function (e) {
+        var actionBtn = e.target.closest("[data-action]");
+        if (actionBtn) {
+          e.stopPropagation();
+          var action = actionBtn.dataset.action;
+          var id = parseInt(actionBtn.dataset.scanId);
+          if (action === "scan-menu") {
+            openMenuScanId = openMenuScanId === id ? null : id;
+            renderPatientDetail();
+          } else if (action === "rescan") {
+            closeScanMenu();
+            openPatient(patient);
+          } else if (action === "view-model") {
+            closeScanMenu();
+          } else if (action === "export") {
+            closeScanMenu();
+          } else if (action === "delete-scan") {
+            closeScanMenu();
+          }
+          return;
+        }
+        openPatient(patient);
+      });
+    });
   }
 
   function renderScannerBadge() {
@@ -555,6 +599,7 @@
     renderControls();
     renderProgress();
     renderDialog();
+    renderScanAction();
   }
 
   function renderTopBar() {
@@ -562,6 +607,20 @@
     if (display) {
       var patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
       display.textContent = patient ? patient.name : "New Patient";
+    }
+  }
+
+  function renderScanAction() {
+    var icon = document.getElementById("btn-start-icon");
+    if (icon) icon.src = isScanning() ? "icons/pause.png" : "icons/play.png";
+    var label = document.getElementById("btn-start-label");
+    if (label) label.textContent = isScanning() ? "Pause" : "Start";
+
+    var sideToggle = document.getElementById("occlusion-side-toggle");
+    if (sideToggle) {
+      sideToggle.hidden = state.stage !== "occlusion";
+      sideToggle.dataset.side = state.occlusionSide;
+      sideToggle.title = "Scan " + state.occlusionSide + " side";
     }
   }
 
@@ -647,37 +706,35 @@
     const canScan = state.deviceStatus === "ready" || state.deviceStatus === "paused";
     const hasScanData = state.deviceStatus === "paused" || state.deviceStatus === "ready" ||
       state.stageData[state.stage] === "scanned" || state.stageData[state.stage] === "warning";
-    const showBite = state.stage === "occlusion";
-    const showSend = state.stage === "complete";
 
     // Start/Pause button
     const btnStart = el.btnStart();
-    btnStart.disabled = !canScan && !scanning;
-    btnStart.className = "scan-controls__primary" + (scanning ? " scan-controls__primary--scanning" : "");
-    const startIcon = btnStart.querySelector("svg use");
-    startIcon.setAttribute("href", scanning ? "#icon-pause" : "#icon-play");
-    btnStart.lastChild.textContent = scanning ? "Pause" : "Start Scan";
+    if (btnStart) btnStart.disabled = false;
 
     // Reset
-    el.btnReset().disabled = !scanning;
+    if (el.btnReset()) el.btnReset().disabled = !scanning;
 
     // Delete
-    el.btnDelete().disabled = !hasScanData || scanning;
+    if (el.btnDelete()) el.btnDelete().disabled = !hasScanData || scanning;
 
     // Complete vs Send
     const btnComplete = el.btnComplete();
     const btnSend = el.btnSend();
-    if (showSend) {
-      btnComplete.hidden = true;
-      btnSend.hidden = false;
-    } else {
-      btnComplete.hidden = false;
-      btnSend.hidden = true;
-      btnComplete.disabled = !hasScanData || scanning;
+    if (btnComplete && btnSend) {
+      const showSend = state.stage === "complete";
+      if (showSend) {
+        btnComplete.hidden = true;
+        btnSend.hidden = false;
+      } else {
+        btnComplete.hidden = false;
+        btnSend.hidden = true;
+        btnComplete.disabled = !hasScanData || scanning;
+      }
     }
 
     // Bite selector
     const biteSelector = el.biteSelector();
+    if (!biteSelector) return;
     biteSelector.hidden = !showBite;
     biteSelector.querySelectorAll(".scan-controls__bite-btn").forEach(function (b) {
       b.className = "scan-controls__bite-btn";
@@ -690,13 +747,12 @@
 
   function renderProgress() {
     const progressEl = el.scanProgress();
-    if (!progressEl) return;
 
     if (isScanning()) {
-      progressEl.hidden = false;
+      if (progressEl) progressEl.hidden = false;
       renderProgressValues();
     } else {
-      progressEl.hidden = true;
+      if (progressEl) progressEl.hidden = true;
     }
   }
 
@@ -709,6 +765,8 @@
       const secs = state.scanProgress.elapsed % 60;
       time.textContent = String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
     }
+    var framesEl = document.getElementById("scan-frames");
+    if (framesEl) framesEl.textContent = "Frame: " + state.scanProgress.frames;
   }
 
   function renderDialog() {
@@ -783,27 +841,29 @@
     });
 
     // Scan controls
-    el.btnStart().addEventListener("click", function () {
+    var btnStartEl = el.btnStart();
+    if (btnStartEl) btnStartEl.addEventListener("click", function () {
       if (isScanning()) pauseScan();
       else startScan();
     });
 
-    el.btnReset().addEventListener("click", resetScan);
+    if (el.btnReset()) el.btnReset().addEventListener("click", resetScan);
 
-    el.btnDelete().addEventListener("click", function () {
+    if (el.btnDelete()) el.btnDelete().addEventListener("click", function () {
       openDialog("delete");
     });
 
-    el.btnComplete().addEventListener("click", function () {
+    if (el.btnComplete()) el.btnComplete().addEventListener("click", function () {
       openDialog("complete");
     });
 
-    el.btnSend().addEventListener("click", function () {
+    if (el.btnSend()) el.btnSend().addEventListener("click", function () {
       openDialog("saveCase");
     });
 
     // Bite buttons
-    el.biteSelector().querySelectorAll(".scan-controls__bite-btn").forEach(function (btn) {
+    var biteSel = el.biteSelector();
+    if (biteSel) biteSel.querySelectorAll(".scan-controls__bite-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         setBiteType(btn.dataset.bite);
       });
@@ -869,6 +929,29 @@
       }
       const icon = this.querySelector("svg use");
       icon.setAttribute("href", state.cameraEnlarged ? "#icon-minimize" : "#icon-maximize");
+    });
+
+    // Canvas actions
+    document.getElementById("btn-reset-view").addEventListener("click", function () {
+      // Reset view placeholder
+    });
+
+    document.getElementById("btn-toggle-shading").addEventListener("click", function () {
+      var btn = this;
+      var pressed = btn.getAttribute("aria-pressed") === "true";
+      btn.setAttribute("aria-pressed", pressed ? "false" : "true");
+    });
+
+    document.getElementById("btn-scan-mode").addEventListener("click", function () {
+      var btn = this;
+      var isModel = btn.getAttribute("aria-checked") === "true";
+      btn.setAttribute("aria-checked", isModel ? "false" : "true");
+      document.getElementById("scan-mode-label").textContent = isModel ? "Intraoral" : "Model";
+    });
+
+    document.getElementById("occlusion-side-toggle").addEventListener("click", function () {
+      state.occlusionSide = state.occlusionSide === "left" ? "right" : "left";
+      renderScanAction();
     });
 
     // Dialog
@@ -948,6 +1031,9 @@
     document.addEventListener("click", function (e) {
       if (openMenuPatientId !== null && !e.target.closest(".patient-card__overflow")) {
         closePatientMenu();
+      }
+      if (openMenuScanId !== null && !e.target.closest(".scan-card__overflow")) {
+        closeScanMenu();
       }
     });
 
