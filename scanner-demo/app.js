@@ -170,6 +170,30 @@
       variant: "primary",
       input: false,
     },
+    scanLimitStopped: {
+      title: "Warning",
+      body: "Scanning data has reached the limit. Scanning has been stopped.",
+      action: "OK",
+      variant: "warning",
+      input: false,
+      cancel: false,
+    },
+    scanLimitApproaching: {
+      title: "Warning",
+      body: "The current scan count is approaching the limit (you can scan up to 500 more frames). Do you want to stop now?",
+      action: "Yes",
+      cancelLabel: "No",
+      variant: "warning",
+      input: false,
+    },
+    unscannedAreas: {
+      title: "Warning",
+      body: "There are unscanned areas. Do you want to continue scanning?",
+      action: "Yes",
+      cancelLabel: "No",
+      variant: "warning",
+      input: false,
+    },
   };
 
   // Tool definitions by stage
@@ -182,6 +206,22 @@
     { id: "lock", icon: "icons/lock.png", label: "Lock" },
     { id: "delete", icon: "icons/delete.png", label: "Delete" },
   ];
+
+  const TOOL_DISABLED_BY_STAGE = {
+    maxilla: ["bitecheck"],
+    mandible: ["bitecheck"],
+    occlusion: ["undercut", "implant"],
+    complete: ["crop", "undercut", "implant"],
+  };
+
+  const BUSY_DURATION_MS = 900;
+
+  const BUSY_STAGE_LABELS = {
+    maxilla: "Calculating upper arch image data...",
+    mandible: "Calculating lower arch image data...",
+    occlusion: "Calculating bite registration image data...",
+    complete: "Finalizing scan data...",
+  };
 
   // ── State ──
 
@@ -198,11 +238,19 @@
     dialog: null,
     biteType: "centric",
     occlusionSide: "left",
+    occlusionLeftDone: false,
+    occlusionRightDone: false,
     selectedTool: null,
+    biteCheckClosed: true,
+    biteCheckScrewVisible: true,
     cameraEnlarged: false,
+    isStageProcessing: false,
+    pendingStage: null,
+    modelDialogScanId: null,
   };
 
   let scanInterval = null;
+  let stageTransitionTimer = null;
 
   function treatmentIconFor(type) {
     return ICON_ASSET_BASE + (TREATMENT_ICONS[type] || "filling.png");
@@ -217,7 +265,6 @@
     viewPatientList: () => $("#view-patient-list"),
     viewScan: () => $("#view-scan"),
     patientCardList: () => $("#patient-card-list"),
-    patientCount: () => $("#patient-count"),
     patientDetailEmpty: () => $("#patient-detail-empty"),
     patientDetailContent: () => $("#patient-detail-content"),
     detailPatientName: () => $("#detail-patient-name"),
@@ -243,12 +290,19 @@
     btnComplete: () => $("#btn-complete"),
     btnSend: () => $("#btn-send"),
     biteSelector: () => $("#bite-selector"),
+    biteCheckControls: () => $("#bite-check-controls"),
+    cameraFrame: () => $("#camera-frame"),
     cameraPreview: () => $("#camera-preview"),
     dialogOverlay: () => $("#dialog-overlay"),
     dialogTitle: () => $("#dialog-title"),
     dialogBody: () => $("#dialog-body"),
     dialogInput: () => $("#dialog-input"),
     dialogConfirm: () => $("#dialog-confirm"),
+    busyOverlay: () => $("#busy-overlay"),
+    busyBody: () => $("#busy-body"),
+    modelOverlay: () => $("#model-viewer-overlay"),
+    modelMaxillaOpacity: () => $("#model-maxilla-opacity"),
+    modelMandibleOpacity: () => $("#model-mandible-opacity"),
   };
 
   // ── Actions ──
@@ -269,6 +323,8 @@
   }
 
   function openPatient(patient) {
+    clearTimeout(stageTransitionTimer);
+    stageTransitionTimer = null;
     state.selectedPatient = patient;
     state.selectedPatientId = patient ? patient.id : null;
     state.caseName = patient ? patient.name : "New Case";
@@ -277,12 +333,18 @@
     state.deviceStatus = "disconnected";
     state.selectedTool = null;
     state.scanProgress = { frames: 0, elapsed: 0 };
+    state.isStageProcessing = false;
+    state.pendingStage = null;
     stopTimer();
     switchView("scan");
     render();
   }
 
   function backToList() {
+    clearTimeout(stageTransitionTimer);
+    stageTransitionTimer = null;
+    state.isStageProcessing = false;
+    state.pendingStage = null;
     stopTimer();
     switchView("patientList");
   }
@@ -291,15 +353,50 @@
     return state.deviceStatus === "scanning";
   }
 
-  function setStage(stage) {
-    if (state.stage === stage) return;
-    if (state.stageData[state.stage] === "active") {
+  function isToolDisabledForStage(toolId) {
+    return (TOOL_DISABLED_BY_STAGE[state.stage] || []).includes(toolId);
+  }
+
+  function applyStage(stage, options) {
+    const opts = options || {};
+    if (state.stage === stage && !opts.force) return;
+    if (opts.markCurrentScanned) {
+      state.stageData[state.stage] = "scanned";
+    } else if (state.stageData[state.stage] === "active") {
       state.stageData[state.stage] = "pending";
     }
     state.stageData[stage] = "active";
     state.stage = stage;
     state.selectedTool = null;
+    if (opts.resetProgress) {
+      state.scanProgress = { frames: 0, elapsed: 0 };
+    }
+    if (opts.ready) {
+      state.deviceStatus = "ready";
+    }
+  }
+
+  function beginStageProcessing(stage, options) {
+    if (state.isStageProcessing || state.stage === stage) return;
+    if (!options && state.stageData[stage] === "disabled") return;
+    state.isStageProcessing = true;
+    state.pendingStage = stage;
+    state.selectedTool = null;
+    stopTimer();
     render();
+
+    clearTimeout(stageTransitionTimer);
+    stageTransitionTimer = setTimeout(function () {
+      applyStage(stage, options);
+      state.isStageProcessing = false;
+      state.pendingStage = null;
+      stageTransitionTimer = null;
+      render();
+    }, BUSY_DURATION_MS);
+  }
+
+  function setStage(stage) {
+    beginStageProcessing(stage);
   }
 
   function setDeviceStatus(status) {
@@ -337,22 +434,19 @@
   }
 
   function completeStage() {
-    state.stageData[state.stage] = "scanned";
     const idx = STAGE_ORDER.indexOf(state.stage);
     if (idx < STAGE_ORDER.length - 1) {
       const next = STAGE_ORDER[idx + 1];
       if (state.stageData[next] === "disabled" || state.stageData[next] === "pending") {
         state.stageData[next] = "pending";
       }
-      state.stage = next;
-      state.scanProgress = { frames: 0, elapsed: 0 };
-      state.deviceStatus = "ready";
+      beginStageProcessing(next, { markCurrentScanned: true, resetProgress: true, ready: true });
     } else {
       state.deviceStatus = "complete";
+      stopTimer();
+      state.selectedTool = null;
+      render();
     }
-    stopTimer();
-    state.selectedTool = null;
-    render();
   }
 
   function openDialog(type) {
@@ -373,6 +467,38 @@
   function setCaseName(name) {
     state.caseName = name;
     render();
+  }
+
+  function openModelDialog(scanId) {
+    state.modelDialogScanId = scanId;
+    var overlay = el.modelOverlay();
+    if (!overlay) return;
+    overlay.hidden = false;
+    updateModelOpacityPreview();
+  }
+
+  function closeModelDialog() {
+    state.modelDialogScanId = null;
+    var overlay = el.modelOverlay();
+    if (overlay) overlay.hidden = true;
+  }
+
+  function updateModelOpacityPreview() {
+    var maxilla = el.modelMaxillaOpacity();
+    var mandible = el.modelMandibleOpacity();
+    var maxillaValue = document.getElementById("model-maxilla-value");
+    var mandibleValue = document.getElementById("model-mandible-value");
+    var maxillaPreview = document.getElementById("model-preview-maxilla");
+    var mandiblePreview = document.getElementById("model-preview-mandible");
+
+    if (maxilla && maxillaValue && maxillaPreview) {
+      maxillaValue.textContent = maxilla.value + "%";
+      maxillaPreview.style.opacity = String(Number(maxilla.value) / 100);
+    }
+    if (mandible && mandibleValue && mandiblePreview) {
+      mandibleValue.textContent = mandible.value + "%";
+      mandiblePreview.style.opacity = String(Number(mandible.value) / 100);
+    }
   }
 
   // ── Mock timer ──
@@ -447,13 +573,10 @@
         STATUS_LABELS[p.status].toLowerCase().includes(q);
     });
 
-    el.patientCount().textContent = filtered.length;
-
     container.innerHTML = filtered.map(function (p) {
       const selected = state.selectedPatientId === p.id;
       const menuOpen = openMenuPatientId === p.id;
-      return '<div class="patient-card' + (selected ? ' patient-card--selected' : '') + '" data-patient-id="' + p.id + '">' +
-        '<img class="patient-card__icon" src="' + treatmentIconFor(p.type) + '" alt="" loading="lazy">' +
+      return '<div class="patient-card' + (selected ? ' patient-card--selected' : '') + (menuOpen ? ' patient-card--menu-open' : '') + '" data-patient-id="' + p.id + '">' +
         '<div class="patient-card__body">' +
         '<div class="patient-card__name">' + p.name + '</div>' +
         '<div class="patient-card__meta">' +
@@ -462,11 +585,11 @@
         '<span class="patient-card__status patient-card__status--' + p.status + '">' + STATUS_LABELS[p.status] + '</span>' +
         '</div>' +
         '</div>' +
-        '<div class="patient-card__overflow">' +
-        '<button class="patient-card__overflow-btn" data-action="menu" data-patient-id="' + p.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
+        '<div class="patient-card__overflow' + (menuOpen ? ' patient-card__overflow--open' : '') + '">' +
+        '<button class="patient-card__overflow-btn' + (menuOpen ? ' patient-card__overflow-btn--active' : '') + '" data-action="menu" data-patient-id="' + p.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
         (menuOpen ? '<div class="patient-card__menu">' +
-        '<button class="patient-card__menu-item" data-action="edit" data-patient-id="' + p.id + '"><svg class="icon icon--sm"><use href="#icon-pencil"/></svg>Edit</button>' +
-        '<button class="patient-card__menu-item patient-card__menu-item--delete" data-action="delete" data-patient-id="' + p.id + '"><svg class="icon icon--sm"><use href="#icon-trash"/></svg>Delete</button>' +
+        '<button class="patient-card__menu-item" data-action="edit" data-patient-id="' + p.id + '">Edit</button>' +
+        '<button class="patient-card__menu-item patient-card__menu-item--delete" data-action="delete" data-patient-id="' + p.id + '">Delete</button>' +
         '</div>' : '') +
         '</div>' +
         '</div>';
@@ -527,7 +650,7 @@
     const gallery = el.scanGallery();
     gallery.innerHTML = patient.scans.map(function (s) {
       const menuOpen = openMenuScanId === s.id;
-      return '<div class="scan-card" data-scan-id="' + s.id + '">' +
+      return '<div class="scan-card' + (menuOpen ? ' scan-card--menu-open' : '') + '" data-scan-id="' + s.id + '">' +
         '<div class="scan-card__preview">' +
         '<img class="scan-card__preview-icon" src="' + treatmentIconFor(patient.type) + '" alt="" loading="lazy">' +
         '</div>' +
@@ -536,13 +659,13 @@
         '<div class="scan-card__label">' + s.label + '</div>' +
         '<div class="scan-card__date">' + s.date + '  ' + s.time + '</div>' +
         '</div>' +
-        '<div class="scan-card__overflow">' +
-        '<button class="scan-card__overflow-btn" data-action="scan-menu" data-scan-id="' + s.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
+        '<div class="scan-card__overflow' + (menuOpen ? ' scan-card__overflow--open' : '') + '">' +
+        '<button class="scan-card__overflow-btn' + (menuOpen ? ' scan-card__overflow-btn--active' : '') + '" data-action="scan-menu" data-scan-id="' + s.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
         (menuOpen ? '<div class="scan-card__menu">' +
-        '<button class="scan-card__menu-item" data-action="rescan" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-refresh"/></svg>Rescan</button>' +
-        '<button class="scan-card__menu-item" data-action="view-model" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-focus"/></svg>View Model</button>' +
-        '<button class="scan-card__menu-item" data-action="export" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-save"/></svg>Export</button>' +
-        '<button class="scan-card__menu-item scan-card__menu-item--delete" data-action="delete-scan" data-scan-id="' + s.id + '"><svg class="icon icon--sm"><use href="#icon-trash"/></svg>Delete</button>' +
+        '<button class="scan-card__menu-item" data-action="view-model" data-scan-id="' + s.id + '">View Model</button>' +
+        '<button class="scan-card__menu-item" data-action="rescan" data-scan-id="' + s.id + '">Rescan</button>' +
+        '<button class="scan-card__menu-item" data-action="export" data-scan-id="' + s.id + '">Export</button>' +
+        '<button class="scan-card__menu-item scan-card__menu-item--delete" data-action="delete-scan" data-scan-id="' + s.id + '">Delete</button>' +
         '</div>' : '') +
         '</div>' +
         '</div>' +
@@ -550,7 +673,18 @@
     }).join("");
 
     if (patient.scans.length === 0) {
-      gallery.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--color-text-subtle);font:var(--fs-caption);padding:48px 0;">No scan records yet</div>';
+      gallery.innerHTML = '<div class="scan-gallery-empty">' +
+        '<div class="scan-gallery-empty__visual">' +
+        '<img class="scan-gallery-empty__icon" src="EmptyList-Scene.svg" alt="" loading="lazy">' +
+        '</div>' +
+        '<h3 class="scan-gallery-empty__title">No scan records yet</h3>' +
+        '<p class="scan-gallery-empty__desc">Start a new scan to create this patient gallery.</p>' +
+        '<button class="scan-gallery-empty__button" type="button" data-action="empty-new-scan"><svg class="icon icon--sm"><use href="#icon-plus"/></svg><span>New Scan</span></button>' +
+        '</div>';
+      gallery.querySelector("[data-action='empty-new-scan']").addEventListener("click", function () {
+        openPatient(patient);
+      });
+      return;
     }
 
     gallery.querySelectorAll(".scan-card").forEach(function (card) {
@@ -568,6 +702,7 @@
             openPatient(patient);
           } else if (action === "view-model") {
             closeScanMenu();
+            openModelDialog(id);
           } else if (action === "export") {
             closeScanMenu();
           } else if (action === "delete-scan") {
@@ -585,9 +720,13 @@
     const label = el.scannerBadgeLabel();
     if (!badge || !label) return;
 
-    const status = state.deviceStatus;
-    badge.className = "scanner-badge scanner-badge--" + status;
-    label.textContent = DEVICE_LABELS[status];
+    const connected = state.deviceStatus !== "disconnected";
+    badge.className = "scanner-badge scanner-badge--" + (connected ? "connected" : "disconnected");
+    label.textContent = connected ? "Connected" : "Disconnected";
+    var icon = badge.querySelector(".scanner-badge__icon");
+    if (icon) {
+      icon.src = connected ? "icons/link-2.png" : "icons/link.png";
+    }
   }
 
   function render() {
@@ -599,6 +738,7 @@
     renderControls();
     renderProgress();
     renderDialog();
+    renderBusyDialog();
     renderScanAction();
   }
 
@@ -611,16 +751,55 @@
   }
 
   function renderScanAction() {
+    var inToolMode = state.selectedTool === "undercut" || state.selectedTool === "bitecheck";
+    var showDepthLegend = state.selectedTool === "undercut" || state.selectedTool === "bitecheck";
+    var showBiteCheckControls = state.selectedTool === "bitecheck";
     var icon = document.getElementById("btn-start-icon");
-    if (icon) icon.src = isScanning() ? "icons/pause.png" : "icons/play.png";
     var label = document.getElementById("btn-start-label");
-    if (label) label.textContent = isScanning() ? "Pause" : "Start";
+    var btnStart = document.getElementById("btn-start");
+    var btnExit = document.getElementById("btn-exit-tool");
+    var undercutScale = document.getElementById("undercut-scale");
+    var biteCheckControls = el.biteCheckControls();
 
-    var sideToggle = document.getElementById("occlusion-side-toggle");
-    if (sideToggle) {
-      sideToggle.hidden = state.stage !== "occlusion";
-      sideToggle.dataset.side = state.occlusionSide;
-      sideToggle.title = "Scan " + state.occlusionSide + " side";
+    if (btnStart) btnStart.hidden = inToolMode;
+    if (btnExit) btnExit.hidden = !inToolMode;
+    if (btnExit) btnExit.title = state.selectedTool === "bitecheck" ? "Exit Bite Check" : "Exit Undercut";
+    if (undercutScale) undercutScale.hidden = !showDepthLegend;
+    if (biteCheckControls) biteCheckControls.hidden = !showBiteCheckControls;
+
+    if (!inToolMode) {
+      if (icon) icon.src = isScanning() ? "icons/pause.png" : "icons/play.png";
+      if (label) label.textContent = isScanning() ? "Pause" : "Start";
+    }
+
+    var btnBiteOcclusion = document.getElementById("btn-bite-occlusion");
+    if (btnBiteOcclusion) {
+      var biteOcclusionLabel = state.biteCheckClosed ? "Bite: closed" : "Bite: open";
+      btnBiteOcclusion.setAttribute("aria-pressed", state.biteCheckClosed ? "true" : "false");
+      btnBiteOcclusion.setAttribute("aria-label", biteOcclusionLabel);
+      btnBiteOcclusion.title = biteOcclusionLabel;
+    }
+
+    var btnBiteScrew = document.getElementById("btn-bite-screw");
+    if (btnBiteScrew) {
+      var biteScrewLabel = state.biteCheckScrewVisible ? "Screw channel: visible" : "Screw channel: hidden";
+      btnBiteScrew.setAttribute("aria-pressed", state.biteCheckScrewVisible ? "true" : "false");
+      btnBiteScrew.setAttribute("aria-label", biteScrewLabel);
+      btnBiteScrew.title = biteScrewLabel;
+    }
+
+    var sideContainer = document.getElementById("occlusion-side");
+    if (sideContainer) {
+      sideContainer.hidden = state.stage !== "occlusion" || inToolMode;
+      var sideToggle = document.getElementById("occlusion-side-toggle");
+      if (sideToggle) {
+        sideToggle.dataset.side = state.occlusionSide;
+        sideToggle.title = "Scan " + state.occlusionSide + " side";
+      }
+      var checkLeft = document.getElementById("occlusion-check-left");
+      var checkRight = document.getElementById("occlusion-check-right");
+      if (checkLeft) checkLeft.hidden = !state.occlusionLeftDone;
+      if (checkRight) checkRight.hidden = !state.occlusionRightDone;
     }
   }
 
@@ -630,13 +809,16 @@
       const stageState = state.stageData[key];
       const isActive = stageState === "active";
       const isScanned = stageState === "scanned";
+      const isDisabled = stageState === "disabled" || state.isStageProcessing;
 
       // Reset classes
       pill.className = "stage-bar__pill";
       if (isActive) pill.classList.add("stage-bar__pill--active");
       else if (isScanned) pill.classList.add("stage-bar__pill--scanned");
+      if (isDisabled) pill.classList.add("stage-bar__pill--disabled");
 
       pill.setAttribute("aria-current", isActive ? "step" : "");
+      pill.disabled = isDisabled;
 
     });
   }
@@ -654,17 +836,25 @@
       }
 
       const btn = document.createElement("button");
+      const disabled = isToolDisabledForStage(tool.id) || state.isStageProcessing;
       btn.className = "tool-palette__tool-btn";
       if (state.selectedTool === tool.id) {
         btn.classList.add("tool-palette__tool-btn--selected");
       }
-      btn.title = tool.label;
+      if (disabled) {
+        btn.classList.add("tool-palette__tool-btn--disabled");
+      }
+      btn.disabled = disabled;
+      btn.title = disabled ? tool.label + " is not available in this step" : tool.label;
       btn.setAttribute("aria-label", tool.label);
       btn.setAttribute("aria-pressed", state.selectedTool === tool.id);
+      btn.setAttribute("aria-disabled", disabled ? "true" : "false");
       btn.innerHTML = '<img class="tool-palette__icon" src="' + tool.icon + '" alt="' + tool.label + '">';
       btn.addEventListener("click", function () {
+        if (disabled) return;
         state.selectedTool = state.selectedTool === tool.id ? null : tool.id;
         renderLeftRail();
+        renderScanAction();
       });
       container.appendChild(btn);
     });
@@ -674,7 +864,7 @@
     const btn = el.btnDevice();
     if (!btn) return;
 
-    const connected = state.deviceStatus === "connected";
+    const connected = state.deviceStatus !== "disconnected";
     btn.className = "device-status-btn device-status--" + (connected ? "connected" : "disconnected");
 
     const icon = btn.querySelector(".device-status-btn__icon");
@@ -706,6 +896,7 @@
     const canScan = state.deviceStatus === "ready" || state.deviceStatus === "paused";
     const hasScanData = state.deviceStatus === "paused" || state.deviceStatus === "ready" ||
       state.stageData[state.stage] === "scanned" || state.stageData[state.stage] === "warning";
+    const showBite = state.stage === "occlusion";
 
     // Start/Pause button
     const btnStart = el.btnStart();
@@ -783,7 +974,15 @@
     }
 
     overlay.hidden = false;
-    el.dialogTitle().textContent = meta.title;
+    var dialog = document.getElementById("dialog");
+    if (dialog) {
+      dialog.className = "dialog" + (meta.variant === "warning" ? " dialog--warning" : "");
+    }
+    if (meta.variant === "warning") {
+      el.dialogTitle().innerHTML = '<svg class="dialog__warning-icon"><use href="#icon-alert-triangle"/></svg><span>' + meta.title + '</span>';
+    } else {
+      el.dialogTitle().textContent = meta.title;
+    }
     el.dialogBody().textContent = meta.body;
 
     // Input field
@@ -802,10 +1001,29 @@
     confirm.textContent = meta.action;
     confirm.className = "dialog__btn-primary" + (meta.variant === "danger" ? " dialog__btn-primary--danger" : "");
 
+    const cancel = document.getElementById("dialog-cancel");
+    if (cancel) {
+      cancel.hidden = meta.cancel === false;
+      cancel.textContent = meta.cancelLabel || "Cancel";
+    }
+
     // Focus trap
     setTimeout(function () {
       if (!meta.input) confirm.focus();
     }, 50);
+  }
+
+  function renderBusyDialog() {
+    const overlay = el.busyOverlay();
+    if (!overlay) return;
+
+    overlay.hidden = !state.isStageProcessing;
+    if (!state.isStageProcessing) return;
+
+    const body = el.busyBody();
+    if (body) {
+      body.textContent = BUSY_STAGE_LABELS[state.pendingStage] || "Calculating image data before moving to the next step...";
+    }
   }
 
   // ── Event bindings ──
@@ -921,11 +1139,11 @@
     // Camera preview
     $("#btn-camera-size").addEventListener("click", function () {
       state.cameraEnlarged = !state.cameraEnlarged;
-      const cam = el.cameraPreview();
+      const cam = el.cameraFrame();
       if (state.cameraEnlarged) {
-        cam.classList.add("camera--large");
+        cam.classList.add("camera-frame--large");
       } else {
-        cam.classList.remove("camera--large");
+        cam.classList.remove("camera-frame--large");
       }
       const icon = this.querySelector("svg use");
       icon.setAttribute("href", state.cameraEnlarged ? "#icon-minimize" : "#icon-maximize");
@@ -944,14 +1162,62 @@
 
     document.getElementById("btn-scan-mode").addEventListener("click", function () {
       var btn = this;
-      var isModel = btn.getAttribute("aria-checked") === "true";
-      btn.setAttribute("aria-checked", isModel ? "false" : "true");
-      document.getElementById("scan-mode-label").textContent = isModel ? "Intraoral" : "Model";
+      var isIntraoral = btn.getAttribute("aria-checked") === "true";
+      var nextIsIntraoral = !isIntraoral;
+      var label = nextIsIntraoral ? "Intraoral" : "Model";
+      btn.setAttribute("aria-checked", nextIsIntraoral ? "true" : "false");
+      btn.setAttribute("aria-label", "Scan mode: " + label);
+      btn.title = "Scan mode: " + label;
+      document.getElementById("scan-mode-label").textContent = label;
+    });
+
+    document.getElementById("scan-warning-launcher").addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-warning]");
+      if (!btn) return;
+      openDialog(btn.dataset.warning);
+    });
+
+    document.getElementById("btn-bite-occlusion").addEventListener("click", function () {
+      state.biteCheckClosed = !state.biteCheckClosed;
+      renderScanAction();
+    });
+
+    document.getElementById("btn-bite-screw").addEventListener("click", function () {
+      state.biteCheckScrewVisible = !state.biteCheckScrewVisible;
+      renderScanAction();
     });
 
     document.getElementById("occlusion-side-toggle").addEventListener("click", function () {
-      state.occlusionSide = state.occlusionSide === "left" ? "right" : "left";
+      if (state.occlusionSide === "left") {
+        state.occlusionLeftDone = true;
+        state.occlusionSide = "right";
+      } else {
+        state.occlusionRightDone = true;
+        state.occlusionSide = "left";
+      }
       renderScanAction();
+    });
+
+    document.getElementById("btn-exit-tool").addEventListener("click", function () {
+      state.selectedTool = null;
+      renderLeftRail();
+      renderScanAction();
+    });
+
+    [el.modelMaxillaOpacity(), el.modelMandibleOpacity()].forEach(function (slider) {
+      if (slider) slider.addEventListener("input", updateModelOpacityPreview);
+    });
+
+    document.getElementById("model-close").addEventListener("click", closeModelDialog);
+
+    document.getElementById("model-viewer-overlay").addEventListener("click", function (e) {
+      if (e.target === this) closeModelDialog();
+    });
+
+    document.getElementById("model-rescan").addEventListener("click", function () {
+      var patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
+      closeModelDialog();
+      if (patient) openPatient(patient);
     });
 
     // Dialog
@@ -1047,6 +1313,8 @@
         if (epOverlay && !epOverlay.hidden) epOverlay.hidden = true;
         var dpOverlay = document.getElementById("delete-patient-overlay");
         if (dpOverlay && !dpOverlay.hidden) dpOverlay.hidden = true;
+        var modelOverlay = document.getElementById("model-viewer-overlay");
+        if (modelOverlay && !modelOverlay.hidden) closeModelDialog();
         if (openMenuPatientId !== null) closePatientMenu();
       }
     });

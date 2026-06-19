@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scanner X</title>
+  <title>Scanner</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
   <!-- Patient List View -->
   <div class="view view--patient-list" id="view-patient-list">
     <header class="topbar">
-      <span class="topbar__brand">Scanner X</span>
+      <img class="topbar__logo" src="icons/logo.png" alt="Product logo">
       <span class="topbar__spacer"></span>
       <button class="topbar__window-btn" title="Minimize" aria-label="Minimize">
         <svg class="icon icon--sm"><use href="#icon-minus"/></svg>
@@ -28,9 +28,9 @@
       <aside class="patient-sidebar" id="patient-sidebar">
         <div class="patient-sidebar__header">
           <span class="patient-sidebar__title">Patients</span>
-          <span class="patient-sidebar__count" id="patient-count">0</span>
           <button class="patient-sidebar__add-btn" id="btn-add-patient" title="Add Patient">
             <svg class="icon icon--sm"><use href="#icon-plus"/></svg>
+            <span>Add Patient</span>
           </button>
         </div>
         <div class="patient-sidebar__search">
@@ -44,7 +44,7 @@
       <!-- Right: scan records gallery -->
       <main class="patient-detail" id="patient-detail">
         <div class="patient-detail__empty" id="patient-detail-empty">
-          <img class="patient-detail__empty-icon" src="../icon-design/dental-veneer.png" alt="">
+          <img class="patient-detail__empty-icon" src="icons/logo.png" alt="">
           <p>Select a patient to view scan records</p>
         </div>
         <div class="patient-detail__content" id="patient-detail-content" hidden>
@@ -55,7 +55,7 @@
             </div>
             <div class="patient-detail__actions">
               <div class="scanner-badge scanner-badge--disconnected" id="scanner-badge" title="Scanner status">
-                <span class="scanner-badge__dot"></span>
+                <img class="scanner-badge__icon" src="icons/link.png" alt="">
                 <span class="scanner-badge__label" id="scanner-badge-label">Disconnected</span>
               </div>
               <button class="patient-detail__new-btn" id="btn-new-case" title="New Scan">
@@ -164,14 +164,34 @@
     <div class="scan-mode" id="scan-mode">
       <img class="scan-mode__icon" src="icons/smile.png" alt=""/>
       <span class="scan-mode__label" id="scan-mode-label">Intraoral</span>
-      <button class="scan-mode__switch" id="btn-scan-mode" role="switch" aria-checked="false" aria-label="Scan mode: intraoral or model" title="Switch scan mode"></button>
+      <button class="scan-mode__switch" id="btn-scan-mode" role="switch" aria-checked="true" aria-label="Scan mode: Intraoral" title="Scan mode: Intraoral"></button>
+    </div>
+
+    <!-- Hover-only warning simulator for scan warning dialogs -->
+    <div class="scan-warning-launcher" id="scan-warning-launcher">
+      <button class="scan-warning-launcher__trigger" type="button" data-warning="scanLimitStopped" title="Warning dialogs">
+        <svg class="icon icon--sm"><use href="#icon-alert-triangle"/></svg>
+      </button>
+      <div class="scan-warning-launcher__panel">
+        <button type="button" data-warning="scanLimitStopped">Limit stopped</button>
+        <button type="button" data-warning="scanLimitApproaching">Approaching limit</button>
+        <button type="button" data-warning="unscannedAreas">Unscanned areas</button>
+      </div>
     </div>
 
     <!-- Occlusion side toggle (left/right tooth scan) -->
-    <button class="occlusion-side-toggle" id="occlusion-side-toggle" hidden data-side="left" title="Scan left side">
-      <img class="occlusion-side-toggle__half occlusion-side-toggle__half--left" src="icons/navbite.png" alt=""/>
-      <img class="occlusion-side-toggle__half occlusion-side-toggle__half--right" src="icons/navbite.png" alt=""/>
-    </button>
+    <div class="occlusion-side" id="occlusion-side" hidden>
+      <div class="occlusion-side__check occlusion-side__check--left" id="occlusion-check-left" hidden>
+        <img class="occlusion-side__check-icon" src="icons/checkmark.png" alt=""/>
+      </div>
+      <button class="occlusion-side__toggle" id="occlusion-side-toggle" data-side="left" title="Scan left side">
+        <img class="occlusion-side__half occlusion-side__half--left" src="icons/navbite.png" alt=""/>
+        <img class="occlusion-side__half occlusion-side__half--right" src="icons/navbite.png" alt=""/>
+      </button>
+      <div class="occlusion-side__check occlusion-side__check--right" id="occlusion-check-right" hidden>
+        <img class="occlusion-side__check-icon" src="icons/checkmark.png" alt=""/>
+      </div>
+    </div>
 
     <!-- Start/Pause scan button (bottom center) -->
     <button class="scan-start-btn" id="btn-start" title="Start Scan">
@@ -179,27 +199,62 @@
       <span class="scan-start-btn__label" id="btn-start-label">Start</span>
     </button>
 
-    <!-- Scan info bar (above camera preview) -->
-    <div class="scan-info-bar" id="scan-info-bar">
-      <button class="scan-info-bar__info-btn" id="btn-scan-info" title="Scan guidance">
-        <img class="scan-info-bar__info-icon" src="icons/info.png" alt=""/>
+    <!-- Exit undercut mode button (replaces start when undercut active) -->
+    <button class="scan-start-btn" id="btn-exit-tool" hidden title="Exit Undercut">
+      <img class="scan-start-btn__icon" src="icons/quit.png" alt=""/>
+      <span class="scan-start-btn__label">Exit</span>
+    </button>
+
+    <!-- Bite check controls (open/closed and screw channel visibility) -->
+    <div class="bite-check-controls" id="bite-check-controls" hidden>
+      <button class="bite-check-controls__btn" id="btn-bite-occlusion" type="button" aria-pressed="true" aria-label="Bite: closed" title="Bite: closed">
+        <img class="bite-check-controls__icon" src="icons/navbite.png" alt=""/>
       </button>
-      <span class="scan-info-bar__frames" id="scan-frames">Frame: 0</span>
+      <button class="bite-check-controls__btn" id="btn-bite-screw" type="button" aria-pressed="true" aria-label="Screw channel: visible" title="Screw channel: visible">
+        <img class="bite-check-controls__icon" src="icons/teethwithhole.png" alt=""/>
+      </button>
+    </div>
+
+    <!-- Depth legend scale (right side) -->
+    <div class="undercut-scale" id="undercut-scale" hidden>
+      <div class="undercut-scale__bar-wrap">
+        <div class="undercut-scale__bar">
+          <div class="undercut-scale__gradient"></div>
+          <div class="undercut-scale__negative"></div>
+        </div>
+        <div class="undercut-scale__labels">
+          <span>0.75</span>
+          <span>0.60</span>
+          <span>0.45</span>
+          <span>0.30</span>
+          <span>0.15</span>
+          <span>0.00</span>
+        </div>
+      </div>
+      <div class="undercut-scale__unit">mm</div>
     </div>
 
     <!-- CameraPreview -->
-    <div class="camera" id="camera-preview">
-      <div class="camera__header">
-        <div class="camera__header-left">
-          <span>Live Camera</span>
-        </div>
-        <div class="camera__actions">
-          <button class="camera__btn" id="btn-camera-size" title="Enlarge">
-            <svg class="icon icon--sm"><use href="#icon-maximize"/></svg>
-          </button>
-        </div>
+    <div class="camera-frame" id="camera-frame">
+      <div class="scan-info-bar" id="scan-info-bar">
+        <button class="scan-info-bar__info-btn" id="btn-scan-info" title="Scan guidance">
+          <img class="scan-info-bar__info-icon" src="icons/info.png" alt=""/>
+        </button>
+        <span class="scan-info-bar__frames" id="scan-frames">Frame: 0</span>
       </div>
-      <div class="camera__body">Camera feed placeholder</div>
+      <div class="camera" id="camera-preview">
+        <div class="camera__header">
+          <div class="camera__header-left">
+            <span>Live Camera</span>
+          </div>
+          <div class="camera__actions">
+            <button class="camera__btn" id="btn-camera-size" title="Enlarge">
+              <svg class="icon icon--sm"><use href="#icon-maximize"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="camera__body">Camera feed placeholder</div>
+      </div>
     </div>
 
     <!-- ScanControls (hidden, pending redesign) -->
@@ -387,6 +442,11 @@
       <line x1="12" y1="5" x2="12" y2="19"/>
       <line x1="5" y1="12" x2="19" y2="12"/>
     </symbol>
+    <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.3 4.2 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </symbol>
     <symbol id="icon-more-v" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/>
       <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
@@ -409,6 +469,48 @@
       <div class="dialog__actions">
         <button class="dialog__btn-cancel" id="dialog-cancel">Cancel</button>
         <button class="dialog__btn-primary" id="dialog-confirm"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Busy dialog for simulated scan processing -->
+  <div class="busy-overlay" id="busy-overlay" hidden>
+    <div class="busy-dialog" role="status" aria-live="polite" aria-label="Processing scan data">
+      <div class="busy-dialog__spinner" aria-hidden="true"></div>
+      <div class="busy-dialog__title" id="busy-title">Processing scan data</div>
+      <div class="busy-dialog__body" id="busy-body">Calculating image data before moving to the next step...</div>
+    </div>
+  </div>
+
+  <!-- Model viewer dialog -->
+  <div class="dialog-overlay" id="model-viewer-overlay" hidden>
+    <div class="dialog dialog--model" role="dialog" aria-modal="true" aria-labelledby="model-dialog-title">
+      <div class="dialog__title" id="model-dialog-title">View Model</div>
+      <div class="model-preview" aria-hidden="true">
+        <div class="model-preview__jaw model-preview__jaw--maxilla" id="model-preview-maxilla">
+          <img src="icons/Maxilla.png" alt="">
+        </div>
+        <div class="model-preview__jaw model-preview__jaw--mandible" id="model-preview-mandible">
+          <img src="icons/Mandible.png" alt="">
+        </div>
+      </div>
+      <div class="model-controls">
+        <label class="model-control">
+          <img class="model-control__icon" src="icons/Maxilla.png" alt="">
+          <span class="model-control__label">Maxilla</span>
+          <input class="model-control__slider" id="model-maxilla-opacity" type="range" min="0" max="100" value="100">
+          <span class="model-control__value" id="model-maxilla-value">100%</span>
+        </label>
+        <label class="model-control">
+          <img class="model-control__icon" src="icons/Mandible.png" alt="">
+          <span class="model-control__label">Mandible</span>
+          <input class="model-control__slider" id="model-mandible-opacity" type="range" min="0" max="100" value="100">
+          <span class="model-control__value" id="model-mandible-value">100%</span>
+        </label>
+      </div>
+      <div class="dialog__actions">
+        <button class="dialog__btn-cancel" id="model-close" type="button">Close</button>
+        <button class="dialog__btn-primary" id="model-rescan" type="button">Rescan</button>
       </div>
     </div>
   </div>
