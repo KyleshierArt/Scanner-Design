@@ -2016,15 +2016,51 @@ button:disabled {
   z-index: 80;
 }
 
+.patient-card__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: 4px;
+}
+
 .patient-card__name {
   font: var(--fs-body-strong);
-  font-size: 15px;
+  font-size: 16px;
   color: var(--color-text);
-  margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   letter-spacing: -0.374px;
+}
+
+.patient-card__tag {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.45;
+}
+
+.patient-card__tag--scanning {
+  color: var(--color-brand);
+  background: var(--color-brand-soft);
+}
+
+.patient-card__tag--completed {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+}
+
+.patient-card__tag--pending {
+  color: var(--color-warning-strong);
+  background: var(--color-warning-soft);
+}
+
+.patient-card__tag--sent {
+  color: var(--color-text-subtle);
+  background: var(--color-surface-muted);
 }
 
 .patient-card__meta {
@@ -2032,15 +2068,23 @@ button:disabled {
   align-items: center;
   gap: var(--space-xs);
   font: var(--fs-caption);
-  font-size: 12px;
+  font-size: 14px;
   color: var(--color-text-muted);
   min-width: 0;
+}
+
+.patient-card__id {
+  font: var(--fs-mono);
+  font-size: 13px;
+  color: var(--color-text-subtle);
+  letter-spacing: 0;
+  flex-shrink: 0;
 }
 
 .patient-card__type {
   color: var(--color-text-body);
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: -0.224px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2053,13 +2097,6 @@ button:disabled {
   border-radius: 50%;
   background: var(--color-border-strong);
   flex-shrink: 0;
-}
-
-.patient-card__status {
-  font: var(--fs-caption);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0;
 }
 
 .patient-card__overflow {
@@ -2140,10 +2177,6 @@ button:disabled {
   background: var(--color-danger-soft);
 }
 
-.patient-card__status--scanning { color: var(--color-brand); }
-.patient-card__status--completed { color: var(--color-success); }
-.patient-card__status--pending { color: var(--color-warning-strong); }
-.patient-card__status--sent { color: var(--color-text-subtle); }
 
 /* Right detail: scan gallery */
 .patient-detail {

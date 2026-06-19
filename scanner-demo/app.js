@@ -211,7 +211,7 @@
     maxilla: ["bitecheck"],
     mandible: ["bitecheck"],
     occlusion: ["undercut", "implant"],
-    complete: ["crop", "undercut", "implant"],
+    complete: [],
   };
 
   const BUSY_DURATION_MS = 900;
@@ -241,8 +241,8 @@
     occlusionLeftDone: false,
     occlusionRightDone: false,
     selectedTool: null,
-    biteCheckClosed: true,
-    biteCheckScrewVisible: true,
+    biteCheckClosed: false,
+    biteCheckScrewVisible: false,
     cameraEnlarged: false,
     isStageProcessing: false,
     pendingStage: null,
@@ -378,7 +378,6 @@
 
   function beginStageProcessing(stage, options) {
     if (state.isStageProcessing || state.stage === stage) return;
-    if (!options && state.stageData[stage] === "disabled") return;
     state.isStageProcessing = true;
     state.pendingStage = stage;
     state.selectedTool = null;
@@ -578,11 +577,14 @@
       const menuOpen = openMenuPatientId === p.id;
       return '<div class="patient-card' + (selected ? ' patient-card--selected' : '') + (menuOpen ? ' patient-card--menu-open' : '') + '" data-patient-id="' + p.id + '">' +
         '<div class="patient-card__body">' +
-        '<div class="patient-card__name">' + p.name + '</div>' +
+        '<div class="patient-card__row">' +
+        '<span class="patient-card__name">' + p.name + '</span>' +
+        '<span class="patient-card__tag patient-card__tag--' + p.status + '">' + STATUS_LABELS[p.status] + '</span>' +
+        '</div>' +
         '<div class="patient-card__meta">' +
-        '<span class="patient-card__type">' + p.type + '</span>' +
+        '<span class="patient-card__id">P-' + String(p.id).padStart(4, "0") + '</span>' +
         '<span class="patient-card__dot"></span>' +
-        '<span class="patient-card__status patient-card__status--' + p.status + '">' + STATUS_LABELS[p.status] + '</span>' +
+        '<span class="patient-card__type">' + p.type + '</span>' +
         '</div>' +
         '</div>' +
         '<div class="patient-card__overflow' + (menuOpen ? ' patient-card__overflow--open' : '') + '">' +
@@ -809,7 +811,7 @@
       const stageState = state.stageData[key];
       const isActive = stageState === "active";
       const isScanned = stageState === "scanned";
-      const isDisabled = stageState === "disabled" || state.isStageProcessing;
+      const isDisabled = state.isStageProcessing;
 
       // Reset classes
       pill.className = "stage-bar__pill";
