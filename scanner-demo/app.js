@@ -1,6 +1,8 @@
 (function () {
   "use strict";
 
+  const THEME_STORAGE_KEY = "scanner-theme";
+
   // ── Patient data ──
 
   const PATIENTS = [
@@ -227,6 +229,7 @@
 
   const state = {
     currentView: "patientList",
+    theme: getInitialTheme(),
     searchQuery: "",
     selectedPatientId: null,
     selectedPatient: null,
@@ -254,6 +257,44 @@
 
   function treatmentIconFor(type) {
     return ICON_ASSET_BASE + (TREATMENT_ICONS[type] || "filling.png");
+  }
+
+  function getInitialTheme() {
+    try {
+      return localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+    } catch (e) {
+      return "dark";
+    }
+  }
+
+  function applyTheme(theme) {
+    state.theme = theme === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = state.theme;
+    if (document.body) {
+      document.body.dataset.theme = state.theme;
+    }
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, state.theme);
+    } catch (e) {
+      // Theme persistence is optional in locked-down preview environments.
+    }
+    updateThemeControls();
+  }
+
+  function toggleTheme() {
+    applyTheme(state.theme === "dark" ? "light" : "dark");
+  }
+
+  function updateThemeControls() {
+    var isDark = state.theme === "dark";
+    var nextLabel = isDark ? "Switch to light mode" : "Switch to dark mode";
+    var nextIcon = isDark ? "#icon-sun" : "#icon-moon";
+    document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
+      btn.title = nextLabel;
+      btn.setAttribute("aria-label", nextLabel);
+      var use = btn.querySelector("use");
+      if (use) use.setAttribute("href", nextIcon);
+    });
   }
 
   // ── DOM refs ──
@@ -1044,6 +1085,12 @@
   // ── Event bindings ──
 
   document.addEventListener("DOMContentLoaded", function () {
+    applyTheme(state.theme);
+
+    document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
+      btn.addEventListener("click", toggleTheme);
+    });
+
     // Patient list events
     el.searchInput().addEventListener("input", function () {
       state.searchQuery = this.value;

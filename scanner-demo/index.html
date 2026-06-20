@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scanner</title>
+  <script>
+    (function () {
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("scanner-theme") || "dark";
+      } catch (e) {
+        document.documentElement.dataset.theme = "dark";
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,6 +22,9 @@
     <header class="topbar">
       <img class="topbar__logo" src="icons/logo.png" alt="Product logo">
       <span class="topbar__spacer"></span>
+      <button class="theme-toggle theme-toggle--topbar" type="button" data-theme-toggle title="Switch to light mode" aria-label="Switch to light mode">
+        <svg class="icon icon--sm"><use href="#icon-sun"/></svg>
+      </button>
       <button class="topbar__window-btn" title="Minimize" aria-label="Minimize">
         <svg class="icon icon--sm"><use href="#icon-minus"/></svg>
       </button>
@@ -96,7 +108,7 @@
       </button>
       <button class="header-chip__case-name" id="btn-edit-patient" title="Edit patient">
         <span id="patient-name-display">Patient</span>
-        <img class="icon icon--md" src="icons/pencil.png" alt="Edit"/>
+        <img class="icon icon--md" src="icons/pen.png" alt="Edit"/>
       </button>
       <button class="header-chip__save" id="btn-save" title="Save case">
         <img class="icon icon--md" src="icons/save1.png" alt=""/>
@@ -106,6 +118,9 @@
 
     <!-- Floating window controls (top-right) -->
     <div class="window-controls">
+      <button class="theme-toggle theme-toggle--scan" type="button" data-theme-toggle title="Switch to light mode" aria-label="Switch to light mode">
+        <svg class="icon icon--sm"><use href="#icon-sun"/></svg>
+      </button>
       <button class="window-controls__btn" title="Minimize" aria-label="Minimize">
         <svg class="icon icon--sm"><use href="#icon-minus"/></svg>
       </button>
@@ -437,6 +452,20 @@
     <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="11" cy="11" r="8"/>
       <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </symbol>
+    <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4"/>
+      <line x1="12" y1="2" x2="12" y2="4"/>
+      <line x1="12" y1="20" x2="12" y2="22"/>
+      <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
+      <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
+      <line x1="2" y1="12" x2="4" y2="12"/>
+      <line x1="20" y1="12" x2="22" y2="12"/>
+      <line x1="6.34" y1="17.66" x2="4.93" y2="19.07"/>
+      <line x1="19.07" y1="4.93" x2="17.66" y2="6.34"/>
+    </symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a7 7 0 1 0 11 11Z"/>
     </symbol>
     <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"/>
