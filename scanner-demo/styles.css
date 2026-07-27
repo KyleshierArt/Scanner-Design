@@ -33,6 +33,9 @@
   --color-surface-muted: #f5f5f7;
   --color-surface-strong: #e8e8ed;
   --color-surface-pearl: #fafafc;
+  --color-patient-list: #f1f2f4;
+  --color-patient-list-card: #f8f8fa;
+  --color-gallery: #ffffff;
   --color-on-accent: #ffffff;
   --color-on-warning: #1d1d1f;
 
@@ -178,6 +181,9 @@ body[data-theme="dark"] {
   --color-surface-muted: #202836;
   --color-surface-strong: #2a3443;
   --color-surface-pearl: #121821;
+  --color-patient-list: #151b24;
+  --color-patient-list-card: #1d2531;
+  --color-gallery: #10161f;
   --color-on-accent: #ffffff;
   --color-on-warning: #1d1d1f;
 
@@ -370,6 +376,7 @@ button:disabled {
   gap: 8px;
   padding: var(--space-xs) var(--space-md);
   border-bottom: 1px solid var(--color-border);
+  background: var(--color-patient-list);
 }
 
 .patient-sidebar__search-input {
@@ -583,6 +590,7 @@ button:disabled {
 }
 
 .stage-bar__pill {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -641,6 +649,27 @@ button:disabled {
 .stage-bar__pill--scanned {
   color: var(--color-success);
   background: var(--color-success-soft);
+}
+
+.stage-bar__done {
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 18px;
+  height: 18px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-50%);
+  border: 2px solid var(--surface-glass);
+  border-radius: 50%;
+  color: #ffffff;
+  background: var(--color-success);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.28);
+}
+
+.stage-bar__pill--scanned .stage-bar__done {
+  display: flex;
 }
 
 .stage-bar__pill--warning {
@@ -1317,6 +1346,20 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
 }
 
 .scan-info-bar__frames {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-body);
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+}
+
+.scan-info-bar__separator {
+  width: 1px;
+  height: 14px;
+  background: var(--color-border);
+}
+
+.scan-info-bar__time {
   font-size: 12px;
   font-weight: 500;
   color: var(--color-text-body);
@@ -2056,11 +2099,7 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background:
-    linear-gradient(var(--canvas-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--canvas-grid-line) 1px, transparent 1px),
-    var(--color-canvas);
-  background-size: 40px 40px;
+  background: var(--color-gallery);
 }
 
 /* Left sidebar: patient card list */
@@ -2070,9 +2109,7 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  background: var(--surface-glass-panel);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: var(--color-patient-list);
 }
 
 .patient-sidebar__header {
@@ -2158,11 +2195,11 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
 
 .patient-card__body {
   min-width: 0;
-  padding-right: 52px;
+  padding-right: 48px;
 }
 
 .patient-card:hover {
-  background: var(--hover-bg);
+  background: var(--color-patient-list-card);
   border-color: var(--color-border);
 }
 
@@ -2192,62 +2229,27 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   letter-spacing: -0.374px;
 }
 
-.patient-card__tag {
-  flex-shrink: 0;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 1.45;
-}
-
-.patient-card__tag--scanning {
-  color: var(--color-brand);
-  background: var(--color-brand-soft);
-}
-
-.patient-card__tag--completed {
-  color: var(--color-success);
-  background: var(--color-success-soft);
-}
-
-.patient-card__tag--pending {
-  color: var(--color-warning-strong);
-  background: var(--color-warning-soft);
-}
-
-.patient-card__tag--sent {
-  color: var(--color-text-subtle);
-  background: var(--color-surface-muted);
-}
-
 .patient-card__meta {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
   font: var(--fs-caption);
   font-size: 14px;
-  color: var(--color-text-muted);
+  color: var(--color-text-body);
   min-width: 0;
 }
 
-.patient-card__id {
-  font: var(--fs-mono);
-  font-size: 13px;
-  color: var(--color-text-subtle);
+.patient-card__created {
+  margin-top: 3px;
+  font: var(--fs-caption);
+  font-size: 12px;
+  color: var(--color-text-muted);
   letter-spacing: 0;
-  flex-shrink: 0;
 }
 
-.patient-card__type {
-  color: var(--color-text-body);
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: -0.224px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+:root[data-theme="dark"] .patient-card__created,
+body[data-theme="dark"] .patient-card__created {
+  color: #8795a8;
 }
 
 .patient-card__dot {
@@ -2264,31 +2266,34 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   right: var(--space-sm);
   transform: translateY(-50%);
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition-fast);
 }
 
 .patient-card:hover .patient-card__overflow,
+.patient-card:focus-within .patient-card__overflow,
 .patient-card__overflow--open {
   opacity: 1;
+  pointer-events: auto;
   z-index: 90;
 }
 
 .patient-card__overflow-btn {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   color: var(--color-text-muted);
-  transition: all var(--transition-fast);
-  background: var(--color-surface);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  background: transparent;
   border: none;
 }
 
 .patient-card__overflow-btn:hover {
-  color: var(--color-text);
-  background: var(--color-surface-muted);
+  color: var(--color-brand);
+  background: var(--color-brand-soft);
 }
 
 .patient-card__overflow-btn--active,
@@ -2343,7 +2348,7 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--surface-detail);
+  background: var(--color-gallery);
 }
 
 .patient-detail__empty {
@@ -2375,9 +2380,7 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   justify-content: space-between;
   padding: var(--space-lg) var(--space-xl) var(--space-md);
   border-bottom: 1px solid var(--color-border);
-  background: var(--surface-glass);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: var(--color-gallery);
 }
 
 .patient-detail__name {
@@ -2561,31 +2564,68 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   position: relative;
   flex-shrink: 0;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition-fast);
 }
 
 .scan-card:hover .scan-card__overflow,
+.scan-card:focus-within .scan-card__overflow,
 .scan-card__overflow--open {
   opacity: 1;
+  pointer-events: auto;
   z-index: 70;
 }
 
+.scan-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.scan-card:hover .scan-card__actions,
+.scan-card:focus-within .scan-card__actions,
+.scan-card--menu-open .scan-card__actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scan-card__action-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-muted);
+  background: transparent;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.scan-card__action-btn:hover {
+  color: var(--color-brand);
+  background: var(--color-brand-soft);
+}
+
 .scan-card__overflow-btn {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   color: var(--color-text-muted);
-  transition: all var(--transition-fast);
-  background: var(--color-surface);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  background: transparent;
   border: none;
 }
 
 .scan-card__overflow-btn:hover {
-  color: var(--color-text);
-  background: var(--color-surface-muted);
+  color: var(--color-brand);
+  background: var(--color-brand-soft);
 }
 
 .scan-card__overflow-btn--active,
@@ -2655,20 +2695,45 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   filter: saturate(0.95);
 }
 
-.scan-card__stage-tag {
+.scan-card__status-tag {
   position: absolute;
   top: 8px;
   left: 8px;
   font: var(--fs-caption);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 3px 10px;
-  background: rgba(0, 0, 0, 0.5);
+  padding: 4px 12px;
+  background: var(--color-surface);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   letter-spacing: 0;
+}
+
+.scan-card__status-tag--waiting {
+  color: var(--color-warning-strong);
+  background: var(--color-warning-soft);
+  border-color: transparent;
+}
+
+.scan-card__status-tag--saved {
+  color: var(--color-brand);
+  background: var(--color-brand-soft);
+  border-color: transparent;
+}
+
+.scan-card__status-tag--scanned {
+  color: var(--color-success);
+  background: var(--color-success-soft);
+  border-color: transparent;
+}
+
+.scan-card__status-tag--scanning {
+  color: var(--color-brand);
+  background: var(--color-brand-soft);
+  border-color: var(--color-brand);
 }
 
 .scan-card__info {

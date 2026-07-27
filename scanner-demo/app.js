@@ -6,54 +6,56 @@
   // ── Patient data ──
 
   const PATIENTS = [
-    { id: 1, name: "John Miller", type: "Orthodontics", date: "2026-06-13", status: "scanning",
+    { id: 1, name: "John Miller", gender: "Male", dob: "1982-07-19", createdAt: "2026-06-13", type: "Orthodontics",
       scans: [
-        { id: 101, label: "Upper Arch", stage: "Maxilla", date: "2026-06-13", time: "14:32" },
-        { id: 102, label: "Lower Arch", stage: "Mandible", date: "2026-06-12", time: "10:15" },
+        { id: 101, orderType: "Orthodontics", stage: "Maxilla", status: "scanning", date: "2026-06-13", time: "14:32" },
+        { id: 102, orderType: "Orthodontics", stage: "Mandible", status: "saved", date: "2026-06-12", time: "10:15" },
+        { id: 103, orderType: "Orthodontics", stage: "Occlusion", status: "waiting", date: "2026-06-13", time: "—" },
       ] },
-    { id: 2, name: "Sarah Chen", type: "Crown & Bridge", date: "2026-06-12", status: "completed",
+    { id: 2, name: "Sarah Chen", gender: "Female", dob: "1991-03-08", createdAt: "2026-06-12", type: "Crown & Bridge",
       scans: [
-        { id: 201, label: "Upper Arch", stage: "Maxilla", date: "2026-06-12", time: "09:20" },
-        { id: 202, label: "Lower Arch", stage: "Mandible", date: "2026-06-12", time: "09:45" },
-        { id: 203, label: "Bite Registration", stage: "Occlusion", date: "2026-06-12", time: "10:05" },
+        { id: 201, orderType: "Crown & Bridge", stage: "Maxilla", status: "scanned", date: "2026-06-12", time: "09:20" },
+        { id: 202, orderType: "Crown & Bridge", stage: "Mandible", status: "scanned", date: "2026-06-12", time: "09:45" },
+        { id: 203, orderType: "Crown & Bridge", stage: "Occlusion", status: "saved", date: "2026-06-12", time: "10:05" },
       ] },
-    { id: 3, name: "Michael Brown", type: "Orthodontics", date: "2026-06-12", status: "pending",
+    { id: 3, name: "Michael Brown", gender: "Male", dob: "1978-11-26", createdAt: "2026-06-12", type: "Orthodontics",
       scans: [] },
-    { id: 4, name: "Emily Davis", type: "Implant", date: "2026-06-11", status: "sent",
+    { id: 4, name: "Emily Davis", gender: "Female", dob: "1986-01-30", createdAt: "2026-06-11", type: "Implant",
       scans: [
-        { id: 401, label: "Upper Arch", stage: "Maxilla", date: "2026-06-11", time: "16:30" },
-        { id: 402, label: "Lower Arch", stage: "Mandible", date: "2026-06-11", time: "16:55" },
-        { id: 403, label: "Bite Registration", stage: "Occlusion", date: "2026-06-11", time: "17:10" },
+        { id: 401, orderType: "Implant", stage: "Maxilla", status: "scanned", date: "2026-06-11", time: "16:30" },
+        { id: 402, orderType: "Implant", stage: "Mandible", status: "scanned", date: "2026-06-11", time: "16:55" },
+        { id: 403, orderType: "Implant", stage: "Occlusion", status: "scanned", date: "2026-06-11", time: "17:10" },
       ] },
-    { id: 5, name: "David Wilson", type: "Crown & Bridge", date: "2026-06-11", status: "completed",
+    { id: 5, name: "David Wilson", gender: "Male", dob: "1975-09-14", createdAt: "2026-06-11", type: "Crown & Bridge",
       scans: [
-        { id: 501, label: "Upper Arch", stage: "Maxilla", date: "2026-06-11", time: "11:00" },
-        { id: 502, label: "Lower Arch", stage: "Mandible", date: "2026-06-11", time: "11:20" },
-        { id: 503, label: "Bite Registration", stage: "Occlusion", date: "2026-06-11", time: "11:35" },
+        { id: 501, orderType: "Crown & Bridge", stage: "Maxilla", status: "saved", date: "2026-06-11", time: "11:00" },
+        { id: 502, orderType: "Crown & Bridge", stage: "Mandible", status: "saved", date: "2026-06-11", time: "11:20" },
+        { id: 503, orderType: "Crown & Bridge", stage: "Occlusion", status: "waiting", date: "2026-06-11", time: "—" },
       ] },
-    { id: 6, name: "Lisa Wang", type: "Denture", date: "2026-06-10", status: "pending",
+    { id: 6, name: "Lisa Wang", gender: "Female", dob: "1994-05-06", createdAt: "2026-06-10", type: "Denture",
       scans: [
-        { id: 601, label: "Upper Arch", stage: "Maxilla", date: "2026-06-10", time: "08:45" },
+        { id: 601, orderType: "Denture", stage: "Maxilla", status: "saved", date: "2026-06-10", time: "08:45" },
+        { id: 602, orderType: "Denture", stage: "Mandible", status: "waiting", date: "2026-06-10", time: "—" },
       ] },
-    { id: 7, name: "James Taylor", type: "Orthodontics", date: "2026-06-09", status: "sent",
+    { id: 7, name: "James Taylor", gender: "Male", dob: "1989-12-02", createdAt: "2026-06-09", type: "Orthodontics",
       scans: [
-        { id: 701, label: "Upper Arch", stage: "Maxilla", date: "2026-06-09", time: "15:10" },
-        { id: 702, label: "Lower Arch", stage: "Mandible", date: "2026-06-09", time: "15:30" },
-        { id: 703, label: "Bite Registration", stage: "Occlusion", date: "2026-06-09", time: "15:50" },
+        { id: 701, orderType: "Orthodontics", stage: "Maxilla", status: "scanned", date: "2026-06-09", time: "15:10" },
+        { id: 702, orderType: "Orthodontics", stage: "Mandible", status: "scanned", date: "2026-06-09", time: "15:30" },
+        { id: 703, orderType: "Orthodontics", stage: "Occlusion", status: "scanned", date: "2026-06-09", time: "15:50" },
       ] },
-    { id: 8, name: "Anna Kim", type: "Implant", date: "2026-06-08", status: "completed",
+    { id: 8, name: "Anna Kim", gender: "Female", dob: "1984-04-17", createdAt: "2026-06-08", type: "Implant",
       scans: [
-        { id: 801, label: "Upper Arch", stage: "Maxilla", date: "2026-06-08", time: "13:20" },
-        { id: 802, label: "Lower Arch", stage: "Mandible", date: "2026-06-08", time: "13:40" },
-        { id: 803, label: "Bite Registration", stage: "Occlusion", date: "2026-06-08", time: "14:00" },
+        { id: 801, orderType: "Implant", stage: "Maxilla", status: "saved", date: "2026-06-08", time: "13:20" },
+        { id: 802, orderType: "Implant", stage: "Mandible", status: "saved", date: "2026-06-08", time: "13:40" },
+        { id: 803, orderType: "Implant", stage: "Occlusion", status: "saved", date: "2026-06-08", time: "14:00" },
       ] },
   ];
 
-  const STATUS_LABELS = {
+  const SCAN_STATUS_LABELS = {
+    waiting: "Waiting to scan",
+    saved: "Saved",
+    scanned: "Scanned",
     scanning: "Scanning",
-    completed: "Completed",
-    pending: "Pending",
-    sent: "Sent to Lab",
   };
 
   // ── Constants ──
@@ -259,6 +261,16 @@
     return ICON_ASSET_BASE + (TREATMENT_ICONS[type] || "filling.png");
   }
 
+  function formatDate(date) {
+    if (!date) return "Not recorded";
+    var parsed = new Date(date + "T00:00:00");
+    return parsed.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
   function getInitialTheme() {
     try {
       return localStorage.getItem(THEME_STORAGE_KEY) || "dark";
@@ -436,7 +448,13 @@
   }
 
   function setStage(stage) {
-    beginStageProcessing(stage);
+    const currentIndex = STAGE_ORDER.indexOf(state.stage);
+    const nextIndex = STAGE_ORDER.indexOf(stage);
+    beginStageProcessing(stage, {
+      markCurrentScanned: nextIndex > currentIndex,
+      resetProgress: nextIndex !== currentIndex,
+      ready: state.deviceStatus !== "disconnected",
+    });
   }
 
   function setDeviceStatus(status) {
@@ -610,7 +628,9 @@
     const filtered = PATIENTS.filter(function (p) {
       return p.name.toLowerCase().includes(q) ||
         p.type.toLowerCase().includes(q) ||
-        STATUS_LABELS[p.status].toLowerCase().includes(q);
+        p.gender.toLowerCase().includes(q) ||
+        p.dob.includes(q) ||
+        p.createdAt.includes(q);
     });
 
     container.innerHTML = filtered.map(function (p) {
@@ -620,13 +640,13 @@
         '<div class="patient-card__body">' +
         '<div class="patient-card__row">' +
         '<span class="patient-card__name">' + p.name + '</span>' +
-        '<span class="patient-card__tag patient-card__tag--' + p.status + '">' + STATUS_LABELS[p.status] + '</span>' +
         '</div>' +
         '<div class="patient-card__meta">' +
-        '<span class="patient-card__id">P-' + String(p.id).padStart(4, "0") + '</span>' +
+        '<span>' + p.gender + '</span>' +
         '<span class="patient-card__dot"></span>' +
-        '<span class="patient-card__type">' + p.type + '</span>' +
+        '<span>DOB ' + formatDate(p.dob) + '</span>' +
         '</div>' +
+        '<div class="patient-card__created">Created ' + formatDate(p.createdAt) + '</div>' +
         '</div>' +
         '<div class="patient-card__overflow' + (menuOpen ? ' patient-card__overflow--open' : '') + '">' +
         '<button class="patient-card__overflow-btn' + (menuOpen ? ' patient-card__overflow-btn--active' : '') + '" data-action="menu" data-patient-id="' + p.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
@@ -697,7 +717,7 @@
     contentEl.hidden = false;
 
     el.detailPatientName().textContent = patient.name;
-    el.detailPatientMeta().textContent = patient.type + "  ·  " + patient.date;
+    el.detailPatientMeta().textContent = patient.type + "  ·  Created " + formatDate(patient.createdAt);
 
     // Scanner badge
     renderScannerBadge();
@@ -706,20 +726,24 @@
     const gallery = el.scanGallery();
     gallery.innerHTML = patient.scans.map(function (s) {
       const menuOpen = openMenuScanId === s.id;
+      const orderType = s.orderType || patient.type;
       return '<div class="scan-card' + (menuOpen ? ' scan-card--menu-open' : '') + '" data-scan-id="' + s.id + '">' +
         '<div class="scan-card__preview">' +
-        '<img class="scan-card__preview-icon" src="' + treatmentIconFor(patient.type) + '" alt="" loading="lazy">' +
+        '<span class="scan-card__status-tag scan-card__status-tag--' + s.status + '">' + SCAN_STATUS_LABELS[s.status] + '</span>' +
+        '<img class="scan-card__preview-icon" src="' + treatmentIconFor(orderType) + '" alt="" loading="lazy">' +
         '</div>' +
         '<div class="scan-card__info">' +
         '<div class="scan-card__info-text">' +
-        '<div class="scan-card__label">' + s.label + '</div>' +
+        '<div class="scan-card__label">' + orderType + '</div>' +
         '<div class="scan-card__date">' + s.date + '  ' + s.time + '</div>' +
+        '</div>' +
+        '<div class="scan-card__actions" aria-label="Scan actions">' +
+        '<button class="scan-card__action-btn" data-action="view-model" data-scan-id="' + s.id + '" title="View Model" aria-label="View Model"><svg class="icon icon--sm"><use href="#icon-eye"/></svg></button>' +
+        '<button class="scan-card__action-btn" data-action="rescan" data-scan-id="' + s.id + '" title="Rescan" aria-label="Rescan"><svg class="icon icon--sm"><use href="#icon-rotate-ccw"/></svg></button>' +
         '</div>' +
         '<div class="scan-card__overflow' + (menuOpen ? ' scan-card__overflow--open' : '') + '">' +
         '<button class="scan-card__overflow-btn' + (menuOpen ? ' scan-card__overflow-btn--active' : '') + '" data-action="scan-menu" data-scan-id="' + s.id + '" title="More"><svg class="icon icon--sm"><use href="#icon-more-v"/></svg></button>' +
         (menuOpen ? '<div class="scan-card__menu">' +
-        '<button class="scan-card__menu-item" data-action="view-model" data-scan-id="' + s.id + '">View Model</button>' +
-        '<button class="scan-card__menu-item" data-action="rescan" data-scan-id="' + s.id + '">Rescan</button>' +
         '<button class="scan-card__menu-item" data-action="export" data-scan-id="' + s.id + '">Export</button>' +
         '<button class="scan-card__menu-item scan-card__menu-item--delete" data-action="delete-scan" data-scan-id="' + s.id + '">Delete</button>' +
         '</div>' : '') +
@@ -994,10 +1018,10 @@
 
   function renderProgress() {
     const progressEl = el.scanProgress();
+    renderProgressValues();
 
     if (isScanning()) {
       if (progressEl) progressEl.hidden = false;
-      renderProgressValues();
     } else {
       if (progressEl) progressEl.hidden = true;
     }
@@ -1006,14 +1030,15 @@
   function renderProgressValues() {
     const frames = el.progressFrames();
     const time = el.progressTime();
+    const mins = Math.floor(state.scanProgress.elapsed / 60);
+    const secs = state.scanProgress.elapsed % 60;
+    const elapsed = String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
     if (frames) frames.textContent = state.scanProgress.frames;
-    if (time) {
-      const mins = Math.floor(state.scanProgress.elapsed / 60);
-      const secs = state.scanProgress.elapsed % 60;
-      time.textContent = String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
-    }
+    if (time) time.textContent = elapsed;
     var framesEl = document.getElementById("scan-frames");
     if (framesEl) framesEl.textContent = "Frame: " + state.scanProgress.frames;
+    var timeEl = document.getElementById("scan-time");
+    if (timeEl) timeEl.textContent = "Time: " + elapsed;
   }
 
   function renderDialog() {
@@ -1181,7 +1206,7 @@
       var dob = document.getElementById("pf-dob").value || "";
       var gender = document.getElementById("pf-gender").value || "";
       var remarks = document.getElementById("pf-remarks").value.trim();
-      PATIENTS.push({ id: newId, name: name, type: "General", date: dateStr, status: "pending", scans: [], dob: dob, gender: gender, remarks: remarks });
+      PATIENTS.push({ id: newId, name: name, type: "General", createdAt: dateStr, scans: [], dob: dob, gender: gender || "Not recorded", remarks: remarks });
       state.selectedPatientId = newId;
       document.getElementById("add-patient-overlay").hidden = true;
       renderPatientList();

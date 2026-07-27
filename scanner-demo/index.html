@@ -147,18 +147,22 @@
       <button class="stage-bar__pill stage-bar__pill--active" data-stage="maxilla" aria-current="step">
         <img class="stage-bar__icon" src="icons/Maxilla.png" alt="" />
         Maxilla
+        <span class="stage-bar__done" aria-hidden="true"><svg class="icon icon--xs"><use href="#icon-check"/></svg></span>
       </button>
       <button class="stage-bar__pill" data-stage="mandible">
         <img class="stage-bar__icon" src="icons/Mandible.png" alt="" />
         Mandible
+        <span class="stage-bar__done" aria-hidden="true"><svg class="icon icon--xs"><use href="#icon-check"/></svg></span>
       </button>
       <button class="stage-bar__pill" data-stage="occlusion">
         <img class="stage-bar__icon" src="icons/navbite.png" alt="" />
         Occlusion
+        <span class="stage-bar__done" aria-hidden="true"><svg class="icon icon--xs"><use href="#icon-check"/></svg></span>
       </button>
       <button class="stage-bar__pill" data-stage="complete">
         <img class="stage-bar__icon" src="icons/checkmark.png" alt="" />
         Complete
+        <span class="stage-bar__done" aria-hidden="true"><svg class="icon icon--xs"><use href="#icon-check"/></svg></span>
       </button>
     </nav>
 
@@ -256,6 +260,8 @@
           <img class="scan-info-bar__info-icon" src="icons/info.png" alt=""/>
         </button>
         <span class="scan-info-bar__frames" id="scan-frames">Frame: 0</span>
+        <span class="scan-info-bar__separator" aria-hidden="true"></span>
+        <span class="scan-info-bar__time" id="scan-time">Time: 00:00</span>
       </div>
       <div class="camera" id="camera-preview">
         <div class="camera__header">
@@ -373,6 +379,13 @@
     <symbol id="icon-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="1,4 1,10 7,10"/>
       <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+    </symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="5,12 10,17 19,7"/>
+    </symbol>
+    <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/>
+      <circle cx="12" cy="12" r="2.5"/>
     </symbol>
     <symbol id="icon-trash" viewBox="0 0 24 24" fill="none">
       <path d="M6.2 7.2h11.6v11.15c0 1.2-.95 2.15-2.15 2.15h-7.3c-1.2 0-2.15-.95-2.15-2.15V7.2Z" fill="#c0deff" stroke="#646662" stroke-width="1.35" stroke-linejoin="round"/>
