@@ -224,10 +224,13 @@
       <span class="scan-start-btn__label">Exit</span>
     </button>
 
-    <!-- Bite check controls (open/closed and screw channel visibility) -->
+    <!-- Bite check controls (separate closed/open choices and screw channel visibility) -->
     <div class="bite-check-controls" id="bite-check-controls" hidden>
-      <button class="bite-check-controls__btn" id="btn-bite-occlusion" type="button" aria-pressed="true" aria-label="Bite: closed" title="Bite: closed">
+      <button class="bite-check-controls__btn" id="btn-bite-closed" type="button" aria-pressed="true" aria-label="Closed bite" title="Closed bite">
         <img class="bite-check-controls__icon" src="icons/navbite.png" alt=""/>
+      </button>
+      <button class="bite-check-controls__btn" id="btn-bite-open" type="button" aria-pressed="false" aria-label="Open bite" title="Open bite">
+        <img class="bite-check-controls__icon" src="icons/teeth-open.png" alt=""/>
       </button>
       <button class="bite-check-controls__btn" id="btn-bite-screw" type="button" aria-pressed="true" aria-label="Screw channel: visible" title="Screw channel: visible">
         <img class="bite-check-controls__icon" src="icons/teethwithhole.png" alt=""/>

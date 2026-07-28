@@ -246,7 +246,7 @@
     occlusionLeftDone: false,
     occlusionRightDone: false,
     selectedTool: null,
-    biteCheckClosed: false,
+    biteCheckClosed: true,
     biteCheckScrewVisible: false,
     cameraEnlarged: false,
     isStageProcessing: false,
@@ -852,12 +852,11 @@
       if (label) label.textContent = isScanning() ? "Pause" : "Start";
     }
 
-    var btnBiteOcclusion = document.getElementById("btn-bite-occlusion");
-    if (btnBiteOcclusion) {
-      var biteOcclusionLabel = state.biteCheckClosed ? "Bite: closed" : "Bite: open";
-      btnBiteOcclusion.setAttribute("aria-pressed", state.biteCheckClosed ? "true" : "false");
-      btnBiteOcclusion.setAttribute("aria-label", biteOcclusionLabel);
-      btnBiteOcclusion.title = biteOcclusionLabel;
+    var btnBiteClosed = document.getElementById("btn-bite-closed");
+    var btnBiteOpen = document.getElementById("btn-bite-open");
+    if (btnBiteClosed && btnBiteOpen) {
+      btnBiteClosed.setAttribute("aria-pressed", state.biteCheckClosed ? "true" : "false");
+      btnBiteOpen.setAttribute("aria-pressed", state.biteCheckClosed ? "false" : "true");
     }
 
     var btnBiteScrew = document.getElementById("btn-bite-screw");
@@ -1264,8 +1263,13 @@
       openDialog(btn.dataset.warning);
     });
 
-    document.getElementById("btn-bite-occlusion").addEventListener("click", function () {
-      state.biteCheckClosed = !state.biteCheckClosed;
+    document.getElementById("btn-bite-closed").addEventListener("click", function () {
+      state.biteCheckClosed = true;
+      renderScanAction();
+    });
+
+    document.getElementById("btn-bite-open").addEventListener("click", function () {
+      state.biteCheckClosed = false;
       renderScanAction();
     });
 
