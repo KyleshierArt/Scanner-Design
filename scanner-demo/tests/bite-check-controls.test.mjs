@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
+const app = await readFile(new URL("../app.js", import.meta.url), "utf8");
 
 function buttonMarkup(id) {
   const match = html.match(new RegExp(`<button[^>]*id="${id}"[^>]*>([\\s\\S]*?)<\\/button>`));
@@ -21,4 +22,23 @@ test("closed and open bite choices are separate icon-only buttons", () => {
     assert.doesNotMatch(button, /<span\b/);
     assert.match(button, /aria-label="[^"]+"/);
   }
+});
+
+test("new scans require a type and save that type on their gallery card", () => {
+  for (const type of ["Prosthodontics", "Implant", "Orthodontics", "Model"]) {
+    assert.match(app, new RegExp(`"${type}"`));
+  }
+
+  assert.match(app, /function openScanTypePicker\(\)/);
+  assert.match(app, /data-action="select-scan-type"/);
+  assert.match(app, /data-action="go-scan"/);
+  assert.match(app, /if \(!state\.selectedScanType\) return;/);
+  assert.match(app, /orderType: state\.selectedScanType/);
+});
+
+test("switching patients exits the scan type picker so the new gallery is shown", () => {
+  assert.match(
+    app,
+    /function selectPatient\(id\) \{[\s\S]*?state\.isScanTypePickerOpen = false;[\s\S]*?state\.selectedScanType = null;[\s\S]*?state\.selectedPatientId = id;/
+  );
 });

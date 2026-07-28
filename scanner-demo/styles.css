@@ -2476,6 +2476,138 @@ body[data-theme="dark"] .patient-card__created {
   align-content: start;
 }
 
+.scan-gallery--type-picker {
+  display: block;
+  padding: 0;
+}
+
+.scan-type-picker {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-xxl) var(--space-xl) var(--space-xl);
+  background: var(--color-gallery);
+}
+
+.scan-type-picker__heading {
+  max-width: 720px;
+  margin: 0 auto var(--space-xl);
+  width: 100%;
+  text-align: center;
+}
+
+.scan-type-picker__eyebrow {
+  margin-bottom: var(--space-xs);
+  color: var(--color-brand);
+  font: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.scan-type-picker__title {
+  color: var(--color-text);
+  font: var(--fs-title);
+  font-size: 28px;
+  letter-spacing: -0.5px;
+}
+
+.scan-type-picker__options {
+  width: min(100%, 960px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-md);
+}
+
+.scan-type-picker__option {
+  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.scan-type-picker__option:hover {
+  border-color: var(--color-brand);
+  background: var(--color-brand-soft);
+  transform: translateY(-2px);
+}
+
+.scan-type-picker__option--selected,
+.scan-type-picker__option--selected:hover {
+  border-color: var(--color-brand);
+  background: var(--color-brand-soft);
+  box-shadow: inset 0 0 0 1px var(--color-brand);
+}
+
+.scan-type-picker__icon {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+}
+
+.scan-type-picker__option-label {
+  font: var(--fs-body-strong);
+  font-size: 16px;
+}
+
+.scan-type-picker__option-description {
+  color: var(--color-text-muted);
+  font: var(--fs-caption);
+  text-align: center;
+}
+
+.scan-type-picker__actions {
+  width: min(100%, 960px);
+  margin: var(--space-xl) auto 0;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.scan-type-picker__cancel,
+.scan-type-picker__go {
+  min-height: var(--touch-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0 20px;
+  border-radius: var(--radius-pill);
+  font: var(--fs-label);
+  transition: background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.scan-type-picker__cancel {
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+}
+
+.scan-type-picker__cancel:hover {
+  background: var(--color-surface-strong);
+}
+
+.scan-type-picker__go {
+  color: var(--color-on-accent);
+  background: var(--color-brand);
+}
+
+.scan-type-picker__go:hover:not(:disabled) {
+  background: var(--color-brand-focus);
+}
+
+.scan-type-picker__go:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .scan-gallery-empty {
   grid-column: 1 / -1;
   min-height: min(58vh, 520px);

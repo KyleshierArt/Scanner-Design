@@ -63,12 +63,21 @@
   const ICON_ASSET_BASE = "icons/";
 
   const TREATMENT_ICONS = {
+    "Prosthodontics": "crown.png",
     "Orthodontics": "braces.png",
     "Crown & Bridge": "crown.png",
     "Implant": "enamel.png",
     "Denture": "denture.png",
+    "Model": "smile.png",
     "General": "filling.png",
   };
+
+  const SCAN_TYPES = [
+    { label: "Prosthodontics", icon: "crown.png", description: "Restorative and denture cases" },
+    { label: "Implant", icon: "enamel.png", description: "Implant planning and restoration" },
+    { label: "Orthodontics", icon: "braces.png", description: "Orthodontic assessment" },
+    { label: "Model", icon: "smile.png", description: "Digital model capture" },
+  ];
 
   const STAGE_ORDER = ["maxilla", "mandible", "occlusion", "complete"];
 
@@ -252,6 +261,8 @@
     isStageProcessing: false,
     pendingStage: null,
     modelDialogScanId: null,
+    isScanTypePickerOpen: false,
+    selectedScanType: null,
   };
 
   let scanInterval = null;
@@ -388,9 +399,53 @@
     state.scanProgress = { frames: 0, elapsed: 0 };
     state.isStageProcessing = false;
     state.pendingStage = null;
+    state.isScanTypePickerOpen = false;
+    state.selectedScanType = null;
     stopTimer();
     switchView("scan");
     render();
+  }
+
+  function openScanTypePicker() {
+    if (!state.selectedPatientId) return;
+    state.isScanTypePickerOpen = true;
+    state.selectedScanType = null;
+    renderPatientDetail();
+  }
+
+  function closeScanTypePicker() {
+    state.isScanTypePickerOpen = false;
+    state.selectedScanType = null;
+    renderPatientDetail();
+  }
+
+  function selectScanType(type) {
+    state.selectedScanType = type;
+    renderPatientDetail();
+  }
+
+  function startSelectedScan() {
+    if (!state.selectedScanType) return;
+
+    var patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
+    if (!patient) return;
+
+    var now = new Date();
+    var date = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" + String(now.getDate()).padStart(2, "0");
+    var maxScanId = PATIENTS.reduce(function (maxId, item) {
+      return item.scans.reduce(function (scanMax, scan) { return Math.max(scanMax, scan.id); }, maxId);
+    }, 0);
+
+    patient.scans.push({
+      id: maxScanId + 1,
+      orderType: state.selectedScanType,
+      stage: "Maxilla",
+      status: "waiting",
+      date: date,
+      time: "—",
+    });
+
+    openPatient(patient);
   }
 
   function backToList() {
@@ -580,6 +635,8 @@
   // ── Render functions ──
 
   function selectPatient(id) {
+    state.isScanTypePickerOpen = false;
+    state.selectedScanType = null;
     state.selectedPatientId = id;
     renderPatientList();
     renderPatientDetail();
@@ -724,6 +781,38 @@
 
     // Scan gallery
     const gallery = el.scanGallery();
+    gallery.classList.toggle("scan-gallery--type-picker", state.isScanTypePickerOpen);
+
+    if (state.isScanTypePickerOpen) {
+      gallery.innerHTML = '<section class="scan-type-picker" aria-labelledby="scan-type-picker-title">' +
+        '<div class="scan-type-picker__heading">' +
+        '<p class="scan-type-picker__eyebrow">New scan</p>' +
+        '<h3 class="scan-type-picker__title" id="scan-type-picker-title">Select scan type</h3>' +
+        '</div>' +
+        '<div class="scan-type-picker__options" role="group" aria-label="Scan type">' +
+        SCAN_TYPES.map(function (type) {
+          var selected = type.label === state.selectedScanType;
+          return '<button class="scan-type-picker__option' + (selected ? ' scan-type-picker__option--selected' : '') + '" type="button" data-action="select-scan-type" data-scan-type="' + type.label + '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
+            '<img class="scan-type-picker__icon" src="' + ICON_ASSET_BASE + type.icon + '" alt="">' +
+            '<span class="scan-type-picker__option-label">' + type.label + '</span>' +
+            '<span class="scan-type-picker__option-description">' + type.description + '</span>' +
+            '</button>';
+        }).join("") +
+        '</div>' +
+        '<div class="scan-type-picker__actions">' +
+        '<button class="scan-type-picker__cancel" type="button" data-action="cancel-scan-type">Cancel</button>' +
+        '<button class="scan-type-picker__go" type="button" data-action="go-scan"' + (state.selectedScanType ? '' : ' disabled') + '>Go scan</button>' +
+        '</div>' +
+        '</section>';
+
+      gallery.querySelectorAll("[data-action='select-scan-type']").forEach(function (button) {
+        button.addEventListener("click", function () { selectScanType(button.dataset.scanType); });
+      });
+      gallery.querySelector("[data-action='cancel-scan-type']").addEventListener("click", closeScanTypePicker);
+      gallery.querySelector("[data-action='go-scan']").addEventListener("click", startSelectedScan);
+      return;
+    }
+
     gallery.innerHTML = patient.scans.map(function (s) {
       const menuOpen = openMenuScanId === s.id;
       const orderType = s.orderType || patient.type;
@@ -762,7 +851,7 @@
         '<button class="scan-gallery-empty__button" type="button" data-action="empty-new-scan"><svg class="icon icon--sm"><use href="#icon-plus"/></svg><span>New Scan</span></button>' +
         '</div>';
       gallery.querySelector("[data-action='empty-new-scan']").addEventListener("click", function () {
-        openPatient(patient);
+        openScanTypePicker();
       });
       return;
     }
@@ -1122,8 +1211,7 @@
     });
 
     el.btnNewCase().addEventListener("click", function () {
-      var patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
-      openPatient(patient || null);
+      openScanTypePicker();
     });
 
     el.btnBack().addEventListener("click", backToList);
@@ -1396,7 +1484,8 @@
 
     // Escape key for dialogs
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
+        if (e.key === "Escape") {
+        if (state.isScanTypePickerOpen) closeScanTypePicker();
         if (state.dialog) closeDialog();
         var apOverlay = document.getElementById("add-patient-overlay");
         if (apOverlay && !apOverlay.hidden) apOverlay.hidden = true;
