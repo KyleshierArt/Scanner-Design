@@ -1293,7 +1293,7 @@
       var dob = document.getElementById("pf-dob").value || "";
       var gender = document.getElementById("pf-gender").value || "";
       var remarks = document.getElementById("pf-remarks").value.trim();
-      PATIENTS.push({ id: newId, name: name, type: "General", createdAt: dateStr, scans: [], dob: dob, gender: gender || "Not recorded", remarks: remarks });
+      PATIENTS.unshift({ id: newId, name: name, type: "General", createdAt: dateStr, scans: [], dob: dob, gender: gender || "Not recorded", remarks: remarks });
       state.selectedPatientId = newId;
       document.getElementById("add-patient-overlay").hidden = true;
       renderPatientList();
