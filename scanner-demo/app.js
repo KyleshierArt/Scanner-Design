@@ -184,10 +184,10 @@
       input: false,
     },
     scanLimitStopped: {
-      title: "Warning",
+      title: "Error",
       body: "Scanning data has reached the limit. Scanning has been stopped.",
       action: "OK",
-      variant: "warning",
+      variant: "error",
       input: false,
       cancel: false,
     },
@@ -1217,11 +1217,12 @@
 
     overlay.hidden = false;
     var dialog = document.getElementById("dialog");
+    var isAlertDialog = meta.variant === "warning" || meta.variant === "error";
     if (dialog) {
-      dialog.className = "dialog" + (meta.variant === "warning" ? " dialog--warning" : "");
+      dialog.className = "dialog" + (isAlertDialog ? " dialog--" + meta.variant : "");
     }
-    if (meta.variant === "warning") {
-      el.dialogTitle().innerHTML = '<svg class="dialog__warning-icon"><use href="#icon-alert-triangle"/></svg><span>' + meta.title + '</span>';
+    if (isAlertDialog) {
+      el.dialogTitle().innerHTML = '<svg class="dialog__alert-icon"><use href="#icon-alert-triangle"/></svg><span>' + meta.title + '</span>';
     } else {
       el.dialogTitle().textContent = meta.title;
     }

@@ -63,3 +63,11 @@ test("gallery export opens a configurable export dialog", () => {
   assert.match(app, /openExportDialog\(id\);/);
   assert.match(app, /function closeExportDialog\(\)/);
 });
+
+test("stopped scans use the error dialog treatment", () => {
+  assert.match(
+    app,
+    /scanLimitStopped: \{[\s\S]*?title: "Error",[\s\S]*?variant: "error",/
+  );
+  assert.match(app, /meta\.variant === "warning" \|\| meta\.variant === "error"/);
+});
