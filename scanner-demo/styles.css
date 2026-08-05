@@ -1885,6 +1885,65 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
 
 .dialog--model {
   width: min(840px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog--model-fullscreen {
+  width: calc(100vw - 32px);
+  max-width: none;
+  height: calc(100vh - 32px);
+  max-height: none;
+}
+
+.model-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.model-dialog__header .dialog__title {
+  margin: 0;
+}
+
+.model-dialog__window-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+}
+
+.model-dialog__window-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.model-dialog__window-btn:hover {
+  color: var(--color-text);
+  background: var(--hover-bg-strong);
+}
+
+.model-dialog__content {
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+.dialog--model-fullscreen .model-dialog__content {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .model-preview {
@@ -1893,7 +1952,7 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   min-height: 390px;
   display: grid;
   place-items: center;
-  margin: var(--space-md) 0;
+  margin: 0;
   border-radius: var(--radius-md);
   background:
     linear-gradient(var(--canvas-grid-line-strong) 1px, transparent 1px),
@@ -1901,6 +1960,12 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
     var(--color-surface-muted);
   background-size: 32px 32px;
   overflow: hidden;
+}
+
+.dialog--model-fullscreen .model-preview {
+  min-height: 0;
+  height: auto;
+  flex: 1;
 }
 
 .model-preview::before {
@@ -1940,18 +2005,60 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  margin: var(--space-md) 0 var(--space-lg);
+  margin: var(--space-md) 0 0;
 }
 
 .model-control {
   display: grid;
-  grid-template-columns: 40px 74px minmax(0, 1fr) 48px;
+  grid-template-columns: 40px 40px 74px minmax(0, 1fr) 48px;
   align-items: center;
   gap: var(--space-sm);
   padding: 10px 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--surface-glass);
+}
+
+.model-control--disabled {
+  background: var(--color-surface-muted);
+}
+
+.model-control__switch {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-strong);
+  transition: background var(--transition-fast);
+}
+
+.model-control__switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px var(--canvas-placeholder-title);
+  transition: transform var(--transition-fast);
+}
+
+.model-control__switch[aria-checked="true"] {
+  background: var(--color-brand);
+}
+
+.model-control__switch[aria-checked="true"]::after {
+  transform: translateX(16px);
+}
+
+.model-control__switch[aria-checked="true"]:hover {
+  background: var(--color-brand-focus);
+}
+
+.model-control__switch:hover {
+  background: var(--color-surface-strong);
 }
 
 .model-control__icon {
@@ -1969,6 +2076,11 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
 .model-control__slider {
   width: 100%;
   accent-color: var(--color-brand);
+}
+
+.model-control__slider:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
 }
 
 .model-control__value {
@@ -2695,16 +2807,6 @@ body[data-theme="dark"] .patient-card__created {
 .scan-card__overflow {
   position: relative;
   flex-shrink: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-fast);
-}
-
-.scan-card:hover .scan-card__overflow,
-.scan-card:focus-within .scan-card__overflow,
-.scan-card__overflow--open {
-  opacity: 1;
-  pointer-events: auto;
   z-index: 70;
 }
 
@@ -2713,16 +2815,6 @@ body[data-theme="dark"] .patient-card__created {
   align-items: center;
   gap: 2px;
   flex-shrink: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-fast);
-}
-
-.scan-card:hover .scan-card__actions,
-.scan-card:focus-within .scan-card__actions,
-.scan-card--menu-open .scan-card__actions {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .scan-card__action-btn {

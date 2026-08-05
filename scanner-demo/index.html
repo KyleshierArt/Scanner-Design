@@ -529,33 +529,43 @@
 
   <!-- Model viewer dialog -->
   <div class="dialog-overlay" id="model-viewer-overlay" hidden>
-    <div class="dialog dialog--model" role="dialog" aria-modal="true" aria-labelledby="model-dialog-title">
-      <div class="dialog__title" id="model-dialog-title">View Model</div>
-      <div class="model-preview" aria-hidden="true">
-        <div class="model-preview__jaw model-preview__jaw--maxilla" id="model-preview-maxilla">
-          <img src="icons/Maxilla.png" alt="">
+    <div class="dialog dialog--model" id="model-dialog" role="dialog" aria-modal="true" aria-labelledby="model-dialog-title">
+      <header class="model-dialog__header">
+        <div class="dialog__title" id="model-dialog-title">View Model</div>
+        <div class="model-dialog__window-actions">
+          <button class="model-dialog__window-btn" id="model-toggle-fullscreen" type="button" title="Enter full screen" aria-label="Enter full screen" aria-pressed="false">
+            <svg class="icon icon--sm"><use href="#icon-maximize"/></svg>
+          </button>
+          <button class="model-dialog__window-btn" id="model-close" type="button" title="Close" aria-label="Close">
+            <svg class="icon icon--sm"><use href="#icon-x"/></svg>
+          </button>
         </div>
-        <div class="model-preview__jaw model-preview__jaw--mandible" id="model-preview-mandible">
-          <img src="icons/Mandible.png" alt="">
+      </header>
+      <div class="model-dialog__content">
+        <div class="model-preview" aria-hidden="true">
+          <div class="model-preview__jaw model-preview__jaw--maxilla" id="model-preview-maxilla">
+            <img src="icons/Maxilla.png" alt="">
+          </div>
+          <div class="model-preview__jaw model-preview__jaw--mandible" id="model-preview-mandible">
+            <img src="icons/Mandible.png" alt="">
+          </div>
         </div>
-      </div>
-      <div class="model-controls">
-        <label class="model-control">
-          <img class="model-control__icon" src="icons/Maxilla.png" alt="">
-          <span class="model-control__label">Maxilla</span>
-          <input class="model-control__slider" id="model-maxilla-opacity" type="range" min="0" max="100" value="100">
-          <span class="model-control__value" id="model-maxilla-value">100%</span>
-        </label>
-        <label class="model-control">
-          <img class="model-control__icon" src="icons/Mandible.png" alt="">
-          <span class="model-control__label">Mandible</span>
-          <input class="model-control__slider" id="model-mandible-opacity" type="range" min="0" max="100" value="100">
-          <span class="model-control__value" id="model-mandible-value">100%</span>
-        </label>
-      </div>
-      <div class="dialog__actions">
-        <button class="dialog__btn-cancel" id="model-close" type="button">Close</button>
-        <button class="dialog__btn-primary" id="model-rescan" type="button">Rescan</button>
+        <div class="model-controls">
+          <div class="model-control" id="model-maxilla-control">
+            <button class="model-control__switch" id="model-maxilla-toggle" type="button" role="switch" aria-checked="true" aria-label="Show Maxilla"></button>
+            <img class="model-control__icon" src="icons/Maxilla.png" alt="">
+            <label class="model-control__label" for="model-maxilla-opacity">Maxilla</label>
+            <input class="model-control__slider" id="model-maxilla-opacity" type="range" min="0" max="100" value="100">
+            <span class="model-control__value" id="model-maxilla-value">100%</span>
+          </div>
+          <div class="model-control" id="model-mandible-control">
+            <button class="model-control__switch" id="model-mandible-toggle" type="button" role="switch" aria-checked="true" aria-label="Show Mandible"></button>
+            <img class="model-control__icon" src="icons/Mandible.png" alt="">
+            <label class="model-control__label" for="model-mandible-opacity">Mandible</label>
+            <input class="model-control__slider" id="model-mandible-opacity" type="range" min="0" max="100" value="100">
+            <span class="model-control__value" id="model-mandible-value">100%</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

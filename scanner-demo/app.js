@@ -365,8 +365,11 @@
     busyOverlay: () => $("#busy-overlay"),
     busyBody: () => $("#busy-body"),
     modelOverlay: () => $("#model-viewer-overlay"),
+    modelDialog: () => $("#model-dialog"),
     modelMaxillaOpacity: () => $("#model-maxilla-opacity"),
     modelMandibleOpacity: () => $("#model-mandible-opacity"),
+    modelMaxillaToggle: () => $("#model-maxilla-toggle"),
+    modelMandibleToggle: () => $("#model-mandible-toggle"),
   };
 
   // ── Actions ──
@@ -594,23 +597,49 @@
     state.modelDialogScanId = null;
     var overlay = el.modelOverlay();
     if (overlay) overlay.hidden = true;
+    setModelFullscreen(false);
+  }
+
+  function setModelFullscreen(isFullscreen) {
+    var dialog = el.modelDialog();
+    var button = document.getElementById("model-toggle-fullscreen");
+    if (!dialog || !button) return;
+
+    dialog.classList.toggle("dialog--model-fullscreen", isFullscreen);
+    button.setAttribute("aria-pressed", isFullscreen ? "true" : "false");
+    button.setAttribute("aria-label", isFullscreen ? "Exit full screen" : "Enter full screen");
+    button.title = isFullscreen ? "Exit full screen" : "Enter full screen";
+    var icon = button.querySelector("use");
+    if (icon) icon.setAttribute("href", isFullscreen ? "#icon-minimize" : "#icon-maximize");
   }
 
   function updateModelOpacityPreview() {
     var maxilla = el.modelMaxillaOpacity();
     var mandible = el.modelMandibleOpacity();
+    var maxillaToggle = el.modelMaxillaToggle();
+    var mandibleToggle = el.modelMandibleToggle();
     var maxillaValue = document.getElementById("model-maxilla-value");
     var mandibleValue = document.getElementById("model-mandible-value");
     var maxillaPreview = document.getElementById("model-preview-maxilla");
     var mandiblePreview = document.getElementById("model-preview-mandible");
 
-    if (maxilla && maxillaValue && maxillaPreview) {
-      maxillaValue.textContent = maxilla.value + "%";
-      maxillaPreview.style.opacity = String(Number(maxilla.value) / 100);
+    if (maxilla && maxillaToggle && maxillaValue && maxillaPreview) {
+      var maxillaEnabled = maxillaToggle.getAttribute("aria-checked") === "true";
+      var maxillaOpacity = maxillaEnabled ? Number(maxilla.value) : 0;
+      maxilla.disabled = !maxillaEnabled;
+      maxillaToggle.setAttribute("aria-label", maxillaEnabled ? "Hide Maxilla" : "Show Maxilla");
+      maxilla.closest(".model-control").classList.toggle("model-control--disabled", !maxillaEnabled);
+      maxillaValue.textContent = maxillaOpacity + "%";
+      maxillaPreview.style.opacity = String(maxillaOpacity / 100);
     }
-    if (mandible && mandibleValue && mandiblePreview) {
-      mandibleValue.textContent = mandible.value + "%";
-      mandiblePreview.style.opacity = String(Number(mandible.value) / 100);
+    if (mandible && mandibleToggle && mandibleValue && mandiblePreview) {
+      var mandibleEnabled = mandibleToggle.getAttribute("aria-checked") === "true";
+      var mandibleOpacity = mandibleEnabled ? Number(mandible.value) : 0;
+      mandible.disabled = !mandibleEnabled;
+      mandibleToggle.setAttribute("aria-label", mandibleEnabled ? "Hide Mandible" : "Show Mandible");
+      mandible.closest(".model-control").classList.toggle("model-control--disabled", !mandibleEnabled);
+      mandibleValue.textContent = mandibleOpacity + "%";
+      mandiblePreview.style.opacity = String(mandibleOpacity / 100);
     }
   }
 
@@ -1387,16 +1416,22 @@
       if (slider) slider.addEventListener("input", updateModelOpacityPreview);
     });
 
+    [el.modelMaxillaToggle(), el.modelMandibleToggle()].forEach(function (toggle) {
+      if (toggle) toggle.addEventListener("click", function () {
+        toggle.setAttribute("aria-checked", toggle.getAttribute("aria-checked") === "true" ? "false" : "true");
+        updateModelOpacityPreview();
+      });
+    });
+
     document.getElementById("model-close").addEventListener("click", closeModelDialog);
+
+    document.getElementById("model-toggle-fullscreen").addEventListener("click", function () {
+      var isFullscreen = this.getAttribute("aria-pressed") === "true";
+      setModelFullscreen(!isFullscreen);
+    });
 
     document.getElementById("model-viewer-overlay").addEventListener("click", function (e) {
       if (e.target === this) closeModelDialog();
-    });
-
-    document.getElementById("model-rescan").addEventListener("click", function () {
-      var patient = PATIENTS.find(function (p) { return p.id === state.selectedPatientId; });
-      closeModelDialog();
-      if (patient) openPatient(patient);
     });
 
     // Dialog
