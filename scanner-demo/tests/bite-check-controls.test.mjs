@@ -42,3 +42,24 @@ test("switching patients exits the scan type picker so the new gallery is shown"
     /function selectPatient\(id\) \{[\s\S]*?state\.isScanTypePickerOpen = false;[\s\S]*?state\.selectedScanType = null;[\s\S]*?state\.selectedPatientId = id;/
   );
 });
+
+test("gallery export opens a configurable export dialog", () => {
+  for (const id of [
+    "export-overlay",
+    "export-path",
+    "export-folder-name",
+    "export-format-stl",
+    "export-format-ply",
+    "export-format-obj",
+    "export-confirm",
+    "export-cancel",
+  ]) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+
+  assert.match(html, /id="export-format-stl" type="checkbox" checked/);
+  assert.match(html, /id="export-browse"[^>]*><svg class="icon icon--sm" aria-hidden="true"><use href="#icon-more-h"\/><\/svg><\/button>/);
+  assert.match(app, /function formatExportFolderName\(date\)/);
+  assert.match(app, /openExportDialog\(id\);/);
+  assert.match(app, /function closeExportDialog\(\)/);
+});

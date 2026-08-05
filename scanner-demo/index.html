@@ -497,6 +497,11 @@
       <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
       <circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/>
     </symbol>
+    <symbol id="icon-more-h" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+      <circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+    </symbol>
     <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="19" y1="12" x2="5" y2="12"/>
       <polyline points="12,19 5,12 12,5"/>
@@ -567,6 +572,40 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Export scan dialog -->
+  <div class="dialog-overlay" id="export-overlay" hidden>
+    <div class="dialog dialog--export" role="dialog" aria-modal="true" aria-labelledby="export-dialog-title">
+      <div class="dialog__title" id="export-dialog-title">Export</div>
+      <form class="export-form" id="export-form">
+        <div class="export-form__field">
+          <label class="export-form__label" for="export-path">Export Path:</label>
+          <div class="export-form__input-group">
+            <input class="export-form__input" id="export-path" type="text" autocomplete="off">
+            <button class="export-form__browse" id="export-browse" type="button" title="Browse for export folder" aria-label="Browse for export folder"><svg class="icon icon--sm" aria-hidden="true"><use href="#icon-more-h"/></svg></button>
+            <input id="export-directory-picker" type="file" webkitdirectory hidden>
+          </div>
+        </div>
+        <div class="export-form__field">
+          <label class="export-form__label" for="export-folder-name">Folder Name:</label>
+          <input class="export-form__input" id="export-folder-name" type="text" autocomplete="off">
+        </div>
+        <div class="export-form__field">
+          <span class="export-form__label">Data Format:</span>
+          <div class="export-form__formats" id="export-formats" aria-describedby="export-form-error">
+            <label class="export-form__format"><input id="export-format-stl" type="checkbox" checked> <span>STL</span></label>
+            <label class="export-form__format"><input id="export-format-ply" type="checkbox"> <span>PLY</span></label>
+            <label class="export-form__format"><input id="export-format-obj" type="checkbox"> <span>OBJ</span></label>
+          </div>
+        </div>
+        <p class="export-form__error" id="export-form-error" role="alert" hidden>Select at least one data format.</p>
+        <div class="dialog__actions export-form__actions">
+          <button class="dialog__btn-primary" id="export-confirm" type="submit">Confirm</button>
+          <button class="dialog__btn-cancel" id="export-cancel" type="button">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 

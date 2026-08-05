@@ -261,6 +261,7 @@
     isStageProcessing: false,
     pendingStage: null,
     modelDialogScanId: null,
+    exportScanId: null,
     isScanTypePickerOpen: false,
     selectedScanType: null,
   };
@@ -370,6 +371,11 @@
     modelMandibleOpacity: () => $("#model-mandible-opacity"),
     modelMaxillaToggle: () => $("#model-maxilla-toggle"),
     modelMandibleToggle: () => $("#model-mandible-toggle"),
+    exportOverlay: () => $("#export-overlay"),
+    exportPath: () => $("#export-path"),
+    exportFolderName: () => $("#export-folder-name"),
+    exportFormats: () => $("#export-formats"),
+    exportFormatError: () => $("#export-form-error"),
   };
 
   // ── Actions ──
@@ -598,6 +604,43 @@
     var overlay = el.modelOverlay();
     if (overlay) overlay.hidden = true;
     setModelFullscreen(false);
+  }
+
+  function formatExportFolderName(date) {
+    var pad = function (value) { return String(value).padStart(2, "0"); };
+    return "S" +
+      date.getFullYear() +
+      pad(date.getMonth() + 1) +
+      pad(date.getDate()) +
+      pad(date.getHours()) +
+      pad(date.getMinutes()) +
+      pad(date.getSeconds());
+  }
+
+  function openExportDialog(scanId) {
+    var overlay = el.exportOverlay();
+    if (!overlay) return;
+
+    state.exportScanId = scanId;
+    overlay.dataset.scanId = scanId;
+    el.exportPath().value = "";
+    el.exportFolderName().value = formatExportFolderName(new Date());
+    document.getElementById("export-format-stl").checked = true;
+    document.getElementById("export-format-ply").checked = false;
+    document.getElementById("export-format-obj").checked = false;
+    el.exportFormats().removeAttribute("aria-invalid");
+    el.exportFormatError().hidden = true;
+    overlay.hidden = false;
+    setTimeout(function () { el.exportPath().focus(); }, 50);
+  }
+
+  function closeExportDialog() {
+    state.exportScanId = null;
+    var overlay = el.exportOverlay();
+    if (overlay) {
+      overlay.hidden = true;
+      delete overlay.dataset.scanId;
+    }
   }
 
   function setModelFullscreen(isFullscreen) {
@@ -903,6 +946,7 @@
             openModelDialog(id);
           } else if (action === "export") {
             closeScanMenu();
+            openExportDialog(id);
           } else if (action === "delete-scan") {
             closeScanMenu();
           }
@@ -1434,6 +1478,51 @@
       if (e.target === this) closeModelDialog();
     });
 
+    document.getElementById("export-browse").addEventListener("click", function () {
+      document.getElementById("export-directory-picker").click();
+    });
+
+    document.getElementById("export-directory-picker").addEventListener("change", function () {
+      var firstFile = this.files && this.files[0];
+      if (!firstFile) return;
+      var relativePath = firstFile.webkitRelativePath || "";
+      var directoryName = relativePath.split("/")[0];
+      if (directoryName) el.exportPath().value = "./" + directoryName;
+      this.value = "";
+    });
+
+    document.getElementById("export-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var formats = [
+        document.getElementById("export-format-stl"),
+        document.getElementById("export-format-ply"),
+        document.getElementById("export-format-obj"),
+      ];
+      var hasFormat = formats.some(function (format) { return format.checked; });
+      if (!hasFormat) {
+        el.exportFormats().setAttribute("aria-invalid", "true");
+        el.exportFormatError().hidden = false;
+        formats[0].focus();
+        return;
+      }
+      closeExportDialog();
+    });
+
+    document.getElementById("export-cancel").addEventListener("click", closeExportDialog);
+
+    document.getElementById("export-overlay").addEventListener("click", function (e) {
+      if (e.target === this) closeExportDialog();
+    });
+
+    document.querySelectorAll("#export-formats input").forEach(function (input) {
+      input.addEventListener("change", function () {
+        if (input.checked) {
+          el.exportFormats().removeAttribute("aria-invalid");
+          el.exportFormatError().hidden = true;
+        }
+      });
+    });
+
     // Dialog
     el.dialogOverlay().addEventListener("click", function (e) {
       if (e.target === this) closeDialog();
@@ -1530,6 +1619,8 @@
         if (dpOverlay && !dpOverlay.hidden) dpOverlay.hidden = true;
         var modelOverlay = document.getElementById("model-viewer-overlay");
         if (modelOverlay && !modelOverlay.hidden) closeModelDialog();
+        var exportOverlay = el.exportOverlay();
+        if (exportOverlay && !exportOverlay.hidden) closeExportDialog();
         if (openMenuPatientId !== null) closePatientMenu();
       }
     });

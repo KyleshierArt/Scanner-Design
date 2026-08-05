@@ -2098,6 +2098,141 @@ body[data-theme="dark"] .scan-info-bar__info-icon {
   text-align: right;
 }
 
+/* ── Export Dialog ── */
+
+.dialog--export {
+  width: min(600px, calc(100vw - 32px));
+  padding: 0;
+  overflow: hidden;
+}
+
+.dialog--export .dialog__title {
+  padding: var(--space-md) var(--space-lg);
+  margin: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.export-form {
+  padding: var(--space-lg);
+}
+
+.export-form__field {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.export-form__field + .export-form__field {
+  margin-top: var(--space-md);
+}
+
+.export-form__label {
+  font: var(--fs-body);
+  color: var(--color-text-body);
+}
+
+.export-form__input-group {
+  position: relative;
+  min-width: 0;
+}
+
+.export-form__input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font: var(--fs-body);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.export-form__input:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-brand-soft);
+}
+
+.export-form__input-group .export-form__input {
+  padding-right: 46px;
+}
+
+.export-form__browse {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 38px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-muted);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.export-form__browse:hover {
+  color: var(--color-text);
+  background: var(--hover-bg-strong);
+}
+
+.export-form__formats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-lg);
+  min-height: 40px;
+}
+
+.export-form__formats[aria-invalid="true"] {
+  outline: 1px solid var(--color-danger);
+  outline-offset: 4px;
+  border-radius: var(--radius-xs);
+}
+
+.export-form__format {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--fs-body);
+  color: var(--color-text-body);
+  cursor: pointer;
+}
+
+.export-form__format input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--color-brand);
+}
+
+.export-form__error {
+  margin: var(--space-sm) 0 0 116px;
+  font: var(--fs-helper);
+  color: var(--color-danger);
+}
+
+.export-form__actions {
+  margin-top: var(--space-xl);
+}
+
+@media (max-width: 520px) {
+  .export-form__field {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .export-form__formats {
+    min-height: 0;
+  }
+
+  .export-form__error {
+    margin-left: 0;
+  }
+}
+
 /* ── Patient Form Dialog ── */
 
 .dialog--form {
