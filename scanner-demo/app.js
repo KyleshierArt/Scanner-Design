@@ -228,6 +228,7 @@
   };
 
   const BUSY_DURATION_MS = 900;
+  const COMPLETE_BUSY_DURATION_MS = 3000;
 
   const BUSY_STAGE_LABELS = {
     maxilla: "Calculating upper arch image data...",
@@ -260,6 +261,9 @@
     cameraEnlarged: false,
     isStageProcessing: false,
     pendingStage: null,
+    busyStartedAt: null,
+    busyProgress: 0,
+    busyDurationMs: null,
     modelDialogScanId: null,
     exportScanId: null,
     isScanTypePickerOpen: false,
@@ -268,6 +272,7 @@
 
   let scanInterval = null;
   let stageTransitionTimer = null;
+  let busyProgressFrame = null;
 
   function treatmentIconFor(type) {
     return ICON_ASSET_BASE + (TREATMENT_ICONS[type] || "filling.png");
@@ -365,6 +370,11 @@
     dialogConfirm: () => $("#dialog-confirm"),
     busyOverlay: () => $("#busy-overlay"),
     busyBody: () => $("#busy-body"),
+    busyDialog: () => $(".busy-dialog"),
+    busyProgress: () => $("#busy-progress"),
+    busyProgressFill: () => $("#busy-progress-fill"),
+    busyProgressValue: () => $("#busy-progress-value"),
+    busyProgressTrack: () => $(".busy-dialog__progress-track"),
     modelOverlay: () => $("#model-viewer-overlay"),
     modelDialog: () => $("#model-dialog"),
     modelMaxillaOpacity: () => $("#model-maxilla-opacity"),
@@ -398,6 +408,7 @@
   function openPatient(patient) {
     clearTimeout(stageTransitionTimer);
     stageTransitionTimer = null;
+    stopBusyProgress();
     state.selectedPatient = patient;
     state.selectedPatientId = patient ? patient.id : null;
     state.caseName = patient ? patient.name : "New Case";
@@ -408,6 +419,9 @@
     state.scanProgress = { frames: 0, elapsed: 0 };
     state.isStageProcessing = false;
     state.pendingStage = null;
+    state.busyStartedAt = null;
+    state.busyProgress = 0;
+    state.busyDurationMs = null;
     state.isScanTypePickerOpen = false;
     state.selectedScanType = null;
     stopTimer();
@@ -460,8 +474,11 @@
   function backToList() {
     clearTimeout(stageTransitionTimer);
     stageTransitionTimer = null;
+    stopBusyProgress();
     state.isStageProcessing = false;
     state.pendingStage = null;
+    state.busyStartedAt = null;
+    state.busyDurationMs = null;
     stopTimer();
     switchView("patientList");
   }
@@ -495,20 +512,32 @@
 
   function beginStageProcessing(stage, options) {
     if (state.isStageProcessing || state.stage === stage) return;
+    stopBusyProgress();
     state.isStageProcessing = true;
     state.pendingStage = stage;
+    state.busyStartedAt = performance.now();
+    state.busyProgress = 0;
+    state.busyDurationMs = stage === "complete" ? COMPLETE_BUSY_DURATION_MS : BUSY_DURATION_MS;
     state.selectedTool = null;
     stopTimer();
     render();
 
+    if (stage === "complete") {
+      busyProgressFrame = requestAnimationFrame(updateBusyProgress);
+    }
+
     clearTimeout(stageTransitionTimer);
     stageTransitionTimer = setTimeout(function () {
+      stopBusyProgress();
       applyStage(stage, options);
       state.isStageProcessing = false;
       state.pendingStage = null;
+      state.busyStartedAt = null;
+      state.busyProgress = 0;
+      state.busyDurationMs = null;
       stageTransitionTimer = null;
       render();
-    }, BUSY_DURATION_MS);
+    }, state.busyDurationMs);
   }
 
   function setStage(stage) {
@@ -1263,9 +1292,54 @@
     overlay.hidden = !state.isStageProcessing;
     if (!state.isStageProcessing) return;
 
+    const isFinalizing = state.pendingStage === "complete";
+    const dialog = el.busyDialog();
+    const progress = el.busyProgress();
+    if (dialog) dialog.classList.toggle("busy-dialog--progress", isFinalizing);
+    if (progress) progress.hidden = !isFinalizing;
+
     const body = el.busyBody();
     if (body) {
       body.textContent = BUSY_STAGE_LABELS[state.pendingStage] || "Calculating image data before moving to the next step...";
+    }
+
+    if (isFinalizing) renderBusyProgress();
+  }
+
+  function renderBusyProgress() {
+    const value = Math.min(100, Math.max(0, state.busyProgress));
+    const fill = el.busyProgressFill();
+    const label = el.busyProgressValue();
+    const track = el.busyProgressTrack();
+    if (fill) fill.style.width = value + "%";
+    if (label) label.textContent = value + "%";
+    if (track) {
+      track.setAttribute("aria-valuenow", String(value));
+      track.setAttribute("aria-valuetext", value + "%");
+    }
+  }
+
+  function updateBusyProgress() {
+    if (!state.isStageProcessing || state.pendingStage !== "complete") {
+      stopBusyProgress();
+      return;
+    }
+
+    const elapsed = performance.now() - state.busyStartedAt;
+    state.busyProgress = Math.min(100, Math.floor((elapsed / state.busyDurationMs) * 100));
+    renderBusyProgress();
+
+    if (state.busyProgress < 100) {
+      busyProgressFrame = requestAnimationFrame(updateBusyProgress);
+    } else {
+      busyProgressFrame = null;
+    }
+  }
+
+  function stopBusyProgress() {
+    if (busyProgressFrame !== null) {
+      cancelAnimationFrame(busyProgressFrame);
+      busyProgressFrame = null;
     }
   }
 

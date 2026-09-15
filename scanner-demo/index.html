@@ -527,6 +527,15 @@
   <div class="busy-overlay" id="busy-overlay" hidden>
     <div class="busy-dialog" role="status" aria-live="polite" aria-label="Processing scan data">
       <div class="busy-dialog__spinner" aria-hidden="true"></div>
+      <div class="busy-dialog__progress" id="busy-progress" hidden>
+        <div class="busy-dialog__progress-meta">
+          <span>Progress</span>
+          <span class="busy-dialog__progress-value" id="busy-progress-value">0%</span>
+        </div>
+        <div class="busy-dialog__progress-track" role="progressbar" aria-label="Finalizing scan data" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%">
+          <div class="busy-dialog__progress-fill" id="busy-progress-fill"></div>
+        </div>
+      </div>
       <div class="busy-dialog__title" id="busy-title">Processing scan data</div>
       <div class="busy-dialog__body" id="busy-body">Calculating image data before moving to the next step...</div>
     </div>
